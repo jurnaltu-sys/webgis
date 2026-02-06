@@ -7,4 +7,6 @@ Route::get('/', function () {
     return redirect()->route('wisata.index');
 });
 
-Route::resource('wisata', WisataController::class);
+Route::resource('wisata', WisataController::class)->parameters([
+    'wisata' => 'wisata',
+]);

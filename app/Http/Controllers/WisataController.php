@@ -100,11 +100,30 @@ class WisataController extends Controller
             'jam_buka' => ['nullable', 'string', 'max:50'],
             'rating_avg' => ['nullable', 'numeric', 'min:0'],
             'jml_rating' => ['nullable', 'integer', 'min:0'],
+            'foto_wisata' => ['nullable', 'array'],
+            'foto_wisata.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
 
         $validated['fasilitas'] = $this->normalizeFasilitas($request->input('fasilitas'));
 
-        $wisata->update($validated);
+        DB::transaction(function () use ($validated, $request, $wisata): void {
+            $wisata->update($validated);
+
+            $files = $request->file('foto_wisata', []);
+            if (!empty($files)) {
+                $hasCover = $wisata->foto()->where('is_cover', 1)->exists();
+                foreach ($files as $file) {
+                    $path = $file->store('wisata', 'public');
+
+                    $wisata->foto()->create([
+                        'url' => $path,
+                        'is_cover' => $hasCover ? 0 : 1,
+                    ]);
+
+                    $hasCover = true;
+                }
+            }
+        });
 
         return redirect()
             ->route('wisata.index')

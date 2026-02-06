@@ -1,9 +1,17 @@
 @extends('layouts.app')
 
 @section('content')
-    <h1 class="h4 mb-3">Tambah Wisata</h1>
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="{{ route('wisata.index') }}">Wisata</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Tambah</li>
+        </ol>
+    </nav>
 
-    <div class="card">
+    <div class="card border-primary">
+        <div class="card-header bg-primary text-white">
+            Form Tambah Wisata
+        </div>
         <div class="card-body">
             <form action="{{ route('wisata.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
@@ -48,6 +56,11 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Peta Lokasi</label>
+                            <div id="map" class="rounded border"></div>
                         </div>
 
                         <div class="form-group">
@@ -127,6 +140,25 @@
             </form>
         </div>
     </div>
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""
+    />
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""
+    ></script>
+
+    <style>
+        #map {
+            height: 240px;
+            width: 100%;
+        }
+    </style>
 
     <script>
         (function () {
@@ -237,6 +269,34 @@
                 appendFiles(fileInput.files);
                 fileInput.value = '';
             });
+        })();
+
+        (function () {
+            var latInput = document.getElementById('latitude');
+            var lngInput = document.getElementById('longitude');
+            var defaultLat = parseFloat(latInput.value) || -6.20000000;
+            var defaultLng = parseFloat(lngInput.value) || 106.81666667;
+
+            var map = L.map('map').setView([defaultLat, defaultLng], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            var marker = L.marker([defaultLat, defaultLng]).addTo(map);
+
+            function updateMarker() {
+                var lat = parseFloat(latInput.value);
+                var lng = parseFloat(lngInput.value);
+
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    marker.setLatLng([lat, lng]);
+                    map.setView([lat, lng], map.getZoom());
+                }
+            }
+
+            latInput.addEventListener('input', updateMarker);
+            lngInput.addEventListener('input', updateMarker);
         })();
     </script>
 @endsection
