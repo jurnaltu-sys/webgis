@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\KategoriController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\WisataController;
 
 Route::get('/', function () {
@@ -14,4 +15,8 @@ Route::resource('wisata', WisataController::class)->parameters([
 
 Route::resource('kategori', KategoriController::class)->parameters([
     'kategori' => 'kategori',
+]);
+
+Route::resource('users', UserController::class)->parameters([
+    'users' => 'user',
 ]);

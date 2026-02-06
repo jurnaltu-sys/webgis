@@ -20,6 +20,9 @@
             <li class="nav-item {{ request()->routeIs('kategori.*') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('kategori.index') }}">Kategori</a>
             </li>
+            <li class="nav-item {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('users.index') }}">Users</a>
+            </li>
         </ul>
     </div>
 </nav>
