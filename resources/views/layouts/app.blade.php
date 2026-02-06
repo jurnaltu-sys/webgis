@@ -8,28 +8,46 @@
     @stack('styles')
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <a class="navbar-brand" href="{{ route('wisata.index') }}">WebGIS</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav">
-            <li class="nav-item {{ request()->routeIs('wisata.*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('wisata.index') }}">Wisata</a>
-            </li>
-            <li class="nav-item {{ request()->routeIs('kategori.*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('kategori.index') }}">Kategori</a>
-            </li>
-            <li class="nav-item {{ request()->routeIs('users.*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('users.index') }}">Users</a>
-            </li>
-            <li class="nav-item {{ request()->routeIs('rattings.*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('rattings.index') }}">Ratting</a>
-            </li>
-        </ul>
-    </div>
-</nav>
+@unless (request()->routeIs('login'))
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <a class="navbar-brand" href="{{ route('wisata.index') }}">WebGIS</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item {{ request()->routeIs('wisata.*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('wisata.index') }}">Wisata</a>
+                </li>
+                <li class="nav-item {{ request()->routeIs('kategori.*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('kategori.index') }}">Kategori</a>
+                </li>
+                <li class="nav-item {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('users.index') }}">Users</a>
+                </li>
+                <li class="nav-item {{ request()->routeIs('rattings.*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('rattings.index') }}">Ratting</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        User
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userMenu">
+                        <h6 class="dropdown-header">{{ session('user_email', '-') }}</h6>
+                        <span class="dropdown-item-text text-muted">Level: {{ session('user_role', '-') }}</span>
+                        <div class="dropdown-divider"></div>
+                        <form action="{{ route('logout') }}" method="POST" class="px-3">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-danger btn-block">Logout</button>
+                        </form>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+@endunless
 
 <main class="container py-4">
     @if (session('success'))

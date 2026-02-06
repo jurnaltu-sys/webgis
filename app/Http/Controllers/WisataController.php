@@ -12,6 +12,17 @@ use Illuminate\View\View;
 
 class WisataController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            if (session('user_role') !== 'admin') {
+                return redirect()->route('login');
+            }
+
+            return $next($request);
+        });
+    }
+
     public function index(Request $request): View
     {
         $query = trim((string) $request->query('q', ''));
