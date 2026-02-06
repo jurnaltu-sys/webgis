@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\WisataController;
 
 Route::get('/', function () {
@@ -9,4 +10,8 @@ Route::get('/', function () {
 
 Route::resource('wisata', WisataController::class)->parameters([
     'wisata' => 'wisata',
+]);
+
+Route::resource('kategori', KategoriController::class)->parameters([
+    'kategori' => 'kategori',
 ]);

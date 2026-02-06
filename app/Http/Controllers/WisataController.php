@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Kategori;
 use App\Models\Wisata;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -31,7 +32,9 @@ class WisataController extends Controller
 
     public function create(): View
     {
-        return view('wisata.create');
+        $kategori = Kategori::orderBy('nama')->get();
+
+        return view('wisata.create', compact('kategori'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -79,12 +82,16 @@ class WisataController extends Controller
 
     public function show(Wisata $wisata): View
     {
-        return view('wisata.show', compact('wisata'));
+        $kategori = Kategori::orderBy('nama')->get();
+
+        return view('wisata.show', compact('wisata', 'kategori'));
     }
 
     public function edit(Wisata $wisata): View
     {
-        return view('wisata.edit', compact('wisata'));
+        $kategori = Kategori::orderBy('nama')->get();
+
+        return view('wisata.edit', compact('wisata', 'kategori'));
     }
 
     public function update(Request $request, Wisata $wisata): RedirectResponse

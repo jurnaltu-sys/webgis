@@ -31,8 +31,14 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Kategori ID</label>
-                        <input type="text" class="form-control" value="{{ $wisata->kategori_id }}" readonly>
+                        <label>Kategori</label>
+                        <select class="form-control" disabled>
+                            @foreach ($kategori as $item)
+                                <option value="{{ $item->id }}" {{ (string) $wisata->kategori_id === (string) $item->id ? 'selected' : '' }}>
+                                    {{ $item->nama }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
 
                     <div class="form-row">

@@ -34,8 +34,15 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="kategori_id">Kategori ID</label>
-                            <input type="number" name="kategori_id" id="kategori_id" value="{{ old('kategori_id') }}" class="form-control @error('kategori_id') is-invalid @enderror" min="1" required>
+                            <label for="kategori_id">Kategori</label>
+                            <select name="kategori_id" id="kategori_id" class="form-control @error('kategori_id') is-invalid @enderror" required>
+                                <option value="">Pilih kategori</option>
+                                @foreach ($kategori as $item)
+                                    <option value="{{ $item->id }}" {{ (string) old('kategori_id') === (string) $item->id ? 'selected' : '' }}>
+                                        {{ $item->nama }}
+                                    </option>
+                                @endforeach
+                            </select>
                             @error('kategori_id')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror

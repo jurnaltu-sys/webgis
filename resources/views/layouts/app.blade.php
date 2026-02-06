@@ -17,6 +17,9 @@
             <li class="nav-item {{ request()->routeIs('wisata.*') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('wisata.index') }}">Wisata</a>
             </li>
+            <li class="nav-item {{ request()->routeIs('kategori.*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('kategori.index') }}">Kategori</a>
+            </li>
         </ul>
     </div>
 </nav>
