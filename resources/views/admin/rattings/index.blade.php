@@ -8,7 +8,7 @@
 
     <form method="GET" action="{{ route('rattings.index') }}" class="mb-3">
         <div class="input-group">
-            <input type="text" name="q" value="{{ $query ?? '' }}" class="form-control" placeholder="Cari user, wisata, atau ulasan...">
+            <input type="text" name="q" value="{{ $query ?? '' }}" class="form-control" placeholder="Cari...">
             <div class="input-group-append">
                 <button class="btn btn-outline-secondary" type="submit">Cari</button>
                 @if (!empty($query))
