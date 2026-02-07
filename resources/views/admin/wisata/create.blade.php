@@ -27,7 +27,7 @@
 
                         <div class="form-group">
                             <label for="slug">Slug</label>
-                            <input type="text" name="slug" id="slug" value="{{ old('slug') }}" class="form-control @error('slug') is-invalid @enderror" maxlength="160" required>
+                            <input type="text" name="slug" id="slug" value="{{ old('slug') }}" class="form-control @error('slug') is-invalid @enderror" maxlength="160">
                             @error('slug')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -79,7 +79,7 @@
                         </div>
                             <div class="form-group">
                                 <label for="deskripsi">Deskripsi</label>
-                                <textarea name="deskripsi" id="deskripsi" rows="4" class="form-control @error('deskripsi') is-invalid @enderror" required>{{ old('deskripsi') }}</textarea>
+                                <textarea name="deskripsi" id="deskripsi" rows="4" class="form-control @error('deskripsi') is-invalid @enderror">{{ old('deskripsi') }}</textarea>
                                 @error('deskripsi')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -125,14 +125,14 @@
                         <div class="form-row">
                             <div class="form-group col-md-6">
                                 <label for="rating_avg">Rating Avg</label>
-                                <input type="number" step="0.01" name="rating_avg" id="rating_avg" value="{{ old('rating_avg', '0.00') }}" class="form-control @error('rating_avg') is-invalid @enderror" min="0">
+                                <input type="number" step="0.01" name="rating_avg" id="rating_avg" value="{{ old('rating_avg', '') }}" class="form-control @error('rating_avg') is-invalid @enderror" min="0">
                                 @error('rating_avg')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="form-group col-md-6">
                                 <label for="jml_rating">Jumlah Rating</label>
-                                <input type="number" name="jml_rating" id="jml_rating" value="{{ old('jml_rating', 0) }}" class="form-control @error('jml_rating') is-invalid @enderror" min="0">
+                                <input type="number" name="jml_rating" id="jml_rating" value="{{ old('jml_rating', '') }}" class="form-control @error('jml_rating') is-invalid @enderror" min="0">
                                 @error('jml_rating')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

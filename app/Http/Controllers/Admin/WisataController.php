@@ -55,12 +55,12 @@ class WisataController extends Controller
     {
         $validated = $request->validate([
             'nama' => ['required', 'string', 'max:150'],
-            'slug' => ['required', 'string', 'max:160'],
+            'slug' => ['nullable', 'string', 'max:160'],
             'kategori_id' => ['required', 'integer', 'min:1'],
             'latitude' => ['required', 'numeric'],
             'longitude' => ['required', 'numeric'],
-            'deskripsi' => ['required', 'string'],
-            'fasilitas' => ['required'],
+            'deskripsi' => ['nullable', 'string'],
+            'fasilitas' => ['nullable', 'array'],
             'jam_buka' => ['nullable', 'string', 'max:50'],
             'rating_avg' => ['nullable', 'numeric', 'min:0'],
             'jml_rating' => ['nullable', 'integer', 'min:0'],
@@ -69,7 +69,16 @@ class WisataController extends Controller
             'cover_index' => ['nullable', 'integer', 'min:0'],
         ]);
 
-        $validated['fasilitas'] = $this->normalizeFasilitas($request->input('fasilitas'));
+        $validated['fasilitas'] = $request->input('fasilitas', []);
+        // Set default value jika null agar tidak error pada kolom NOT NULL
+        $validated['slug'] = $validated['slug'] ?? '';
+        $validated['deskripsi'] = $validated['deskripsi'] ?? '';
+        $validated['jam_buka'] = $validated['jam_buka'] ?? '';
+        $validated['rating_avg'] = $validated['rating_avg'] ?? 0;
+        $validated['jml_rating'] = $validated['jml_rating'] ?? 0;
+        if (empty($validated['fasilitas'])) {
+            $validated['fasilitas'] = [];
+        }
 
         DB::transaction(function () use ($validated, $request): void {
             $wisata = Wisata::create($validated);
@@ -116,12 +125,12 @@ class WisataController extends Controller
     {
         $validated = $request->validate([
             'nama' => ['required', 'string', 'max:150'],
-            'slug' => ['required', 'string', 'max:160'],
+            'slug' => ['nullable', 'string', 'max:160'],
             'kategori_id' => ['required', 'integer', 'min:1'],
             'latitude' => ['required', 'numeric'],
             'longitude' => ['required', 'numeric'],
-            'deskripsi' => ['required', 'string'],
-            'fasilitas' => ['required'],
+            'deskripsi' => ['nullable', 'string'],
+            'fasilitas' => ['nullable', 'array'],
             'jam_buka' => ['nullable', 'string', 'max:50'],
             'rating_avg' => ['nullable', 'numeric', 'min:0'],
             'jml_rating' => ['nullable', 'integer', 'min:0'],
@@ -129,7 +138,16 @@ class WisataController extends Controller
             'foto_wisata.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
 
-        $validated['fasilitas'] = $this->normalizeFasilitas($request->input('fasilitas'));
+        $validated['fasilitas'] = $request->input('fasilitas', []);
+        // Set default value jika null agar tidak error pada kolom NOT NULL
+        $validated['slug'] = $validated['slug'] ?? '';
+        $validated['deskripsi'] = $validated['deskripsi'] ?? '';
+        $validated['jam_buka'] = $validated['jam_buka'] ?? '';
+        $validated['rating_avg'] = $validated['rating_avg'] ?? 0;
+        $validated['jml_rating'] = $validated['jml_rating'] ?? 0;
+        if (empty($validated['fasilitas'])) {
+            $validated['fasilitas'] = [];
+        }
 
         DB::transaction(function () use ($validated, $request, $wisata): void {
             $wisata->update($validated);
@@ -157,7 +175,26 @@ class WisataController extends Controller
 
     public function destroy(Wisata $wisata): RedirectResponse
     {
-        $wisata->delete();
+
+        DB::transaction(function () use ($wisata) {
+            // Delete related FotoWisata
+            foreach ($wisata->foto as $foto) {
+                if ($foto->url) {
+                    Storage::disk('public')->delete($foto->url);
+                }
+                $foto->delete();
+            }
+
+            // Delete related Ratting
+            if (method_exists($wisata, 'rattings')) {
+                $wisata->rattings()->delete();
+            } else {
+                // Fallback: delete from Ratting model if relation not defined
+                \App\Models\Ratting::where('wisata_id', $wisata->id)->delete();
+            }
+
+            $wisata->delete();
+        });
 
         return redirect()
             ->route('wisata.index')
@@ -204,19 +241,5 @@ class WisataController extends Controller
         return back()->with('success', 'Gambar cover berhasil diperbarui.');
     }
 
-    private function normalizeFasilitas(mixed $input): array
-    {
-        if (is_string($input)) {
-            $decoded = json_decode($input, true);
-            $input = $decoded ?? $input;
-        }
-
-        if (!is_array($input) || $input === []) {
-            throw ValidationException::withMessages([
-                'fasilitas' => 'Fasilitas wajib diisi dan harus berupa daftar.',
-            ]);
-        }
-
-        return array_values($input);
-    }
+    // normalizeFasilitas dihapus karena tidak diperlukan lagi
 }
