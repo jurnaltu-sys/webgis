@@ -28,6 +28,9 @@
 
                         <button type="submit" class="btn btn-primary btn-block">Masuk</button>
                     </form>
+                    <div class="text-center mt-3">
+                        <small>Belum punya akun? <a href="{{ route('register') }}">Daftar</a></small>
+                    </div>
                 </div>
             </div>
         </div>

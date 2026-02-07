@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Kategori;
 use App\Models\Wisata;
 use Illuminate\Http\RedirectResponse;
@@ -38,14 +39,14 @@ class WisataController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('wisata.index', compact('wisata', 'query'));
+        return view('admin.wisata.index', compact('wisata', 'query'));
     }
 
     public function create(): View
     {
         $kategori = Kategori::orderBy('nama')->get();
 
-        return view('wisata.create', compact('kategori'));
+        return view('admin.wisata.create', compact('kategori'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -95,14 +96,14 @@ class WisataController extends Controller
     {
         $kategori = Kategori::orderBy('nama')->get();
 
-        return view('wisata.show', compact('wisata', 'kategori'));
+        return view('admin.wisata.show', compact('wisata', 'kategori'));
     }
 
     public function edit(Wisata $wisata): View
     {
         $kategori = Kategori::orderBy('nama')->get();
 
-        return view('wisata.edit', compact('wisata', 'kategori'));
+        return view('admin.wisata.edit', compact('wisata', 'kategori'));
     }
 
     public function update(Request $request, Wisata $wisata): RedirectResponse

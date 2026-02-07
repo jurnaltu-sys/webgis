@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -39,12 +40,12 @@ class UserController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('users.index', compact('users', 'query'));
+        return view('admin.users.index', compact('users', 'query'));
     }
 
     public function create(): View
     {
-        return view('users.create');
+        return view('admin.users.create');
     }
 
     public function store(Request $request): RedirectResponse
@@ -67,12 +68,12 @@ class UserController extends Controller
 
     public function show(User $user): View
     {
-        return view('users.show', compact('user'));
+        return view('admin.users.show', compact('user'));
     }
 
     public function edit(User $user): View
     {
-        return view('users.edit', compact('user'));
+        return view('admin.users.edit', compact('user'));
     }
 
     public function update(Request $request, User $user): RedirectResponse

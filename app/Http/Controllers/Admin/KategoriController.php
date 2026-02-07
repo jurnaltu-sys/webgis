@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Kategori;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -35,12 +36,12 @@ class KategoriController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('kategori.index', compact('kategori', 'query'));
+        return view('admin.kategori.index', compact('kategori', 'query'));
     }
 
     public function create(): View
     {
-        return view('kategori.create');
+        return view('admin.kategori.create');
     }
 
     public function store(Request $request): RedirectResponse
@@ -58,12 +59,12 @@ class KategoriController extends Controller
 
     public function show(Kategori $kategori): View
     {
-        return view('kategori.show', compact('kategori'));
+        return view('admin.kategori.show', compact('kategori'));
     }
 
     public function edit(Kategori $kategori): View
     {
-        return view('kategori.edit', compact('kategori'));
+        return view('admin.kategori.edit', compact('kategori'));
     }
 
     public function update(Request $request, Kategori $kategori): RedirectResponse

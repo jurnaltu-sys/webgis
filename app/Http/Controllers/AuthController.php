@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 
 class AuthController extends Controller
@@ -12,6 +14,43 @@ class AuthController extends Controller
     public function showLogin(): View
     {
         return view('auth.login');
+    }
+
+    public function showRegister(): View
+    {
+        return view('auth.register');
+    }
+
+    public function register(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
+        ]);
+
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'role' => 'wisatawan',
+        ]);
+
+        Auth::login($user);
+        $request->session()->regenerate();
+        $request->session()->put([
+            'user_id' => $user->id,
+            'user_email' => $user->email,
+            'user_role' => $user->role,
+        ]);
+
+        $redirectRoute = $user->role === 'wisatawan'
+            ? 'rattings-wisatawan.index'
+            : 'wisata.index';
+
+        return redirect()
+            ->route($redirectRoute)
+            ->with('success', 'Registrasi berhasil.');
     }
 
     public function login(Request $request): RedirectResponse
@@ -33,7 +72,11 @@ class AuthController extends Controller
                 'user_role' => $user?->role,
             ]);
 
-            return redirect()->intended(route('wisata.index'));
+            $redirectRoute = $user?->role === 'wisatawan'
+                ? route('rattings-wisatawan.index')
+                : route('wisata.index');
+
+            return redirect()->intended($redirectRoute);
         }
 
         return back()
