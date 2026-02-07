@@ -13,7 +13,7 @@
         @php
             $userRole = session('user_role');
         @endphp
-        <a class="navbar-brand" href="{{ $userRole === 'wisatawan' ? route('rattings-wisatawan.index') : route('wisata.index') }}">WebGIS</a>
+        <a class="navbar-brand" href="{{ $userRole === 'wisatawan' ? route('dashboard-wisatawan.index') : route('wisata.index') }}">WebGIS</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -33,6 +33,9 @@
                         <a class="nav-link" href="{{ route('rattings.index') }}">Ratting</a>
                     </li>
                 @elseif ($userRole === 'wisatawan')
+                    <li class="nav-item {{ request()->routeIs('dashboard-wisatawan.*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ route('dashboard-wisatawan.index') }}">Dashboard</a>
+                    </li>
                     <li class="nav-item {{ request()->routeIs('rattings-wisatawan.*') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ route('rattings-wisatawan.index') }}">Ratting Saya</a>
                     </li>

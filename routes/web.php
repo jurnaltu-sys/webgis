@@ -6,13 +6,14 @@ use App\Http\Controllers\Admin\KategoriController;
 use App\Http\Controllers\Admin\RattingController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WisataController;
+use App\Http\Controllers\Wisatawan\DashboardWisatawanController;
 use App\Http\Controllers\Wisatawan\RattingWisatawanController;
 
 Route::get('/', function () {
     $role = session('user_role');
 
     if ($role === 'wisatawan') {
-        return redirect()->route('rattings-wisatawan.index');
+        return redirect()->route('dashboard-wisatawan.index');
     }
 
     if ($role === 'admin') {
@@ -47,3 +48,6 @@ Route::resource('rattings', RattingController::class)->parameters([
 Route::resource('rattings-wisatawan', RattingWisatawanController::class)->parameters([
     'rattings-wisatawan' => 'rattings_wisatawan',
 ]);
+
+Route::get('dashboard-wisatawan', [DashboardWisatawanController::class, 'index'])
+    ->name('dashboard-wisatawan.index');

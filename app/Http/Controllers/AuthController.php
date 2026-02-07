@@ -45,7 +45,7 @@ class AuthController extends Controller
         ]);
 
         $redirectRoute = $user->role === 'wisatawan'
-            ? 'rattings-wisatawan.index'
+            ? 'dashboard-wisatawan.index'
             : 'wisata.index';
 
         return redirect()
@@ -73,7 +73,7 @@ class AuthController extends Controller
             ]);
 
             $redirectRoute = $user?->role === 'wisatawan'
-                ? route('rattings-wisatawan.index')
+                ? route('dashboard-wisatawan.index')
                 : route('wisata.index');
 
             return redirect()->intended($redirectRoute);
