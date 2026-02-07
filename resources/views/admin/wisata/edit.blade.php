@@ -110,6 +110,28 @@
                                                     alt="{{ $wisata->nama }}"
                                                     class="img-fluid rounded border"
                                                 >
+                                                <button
+                                                    type="submit"
+                                                    form="delete-foto-{{ $foto->id }}"
+                                                    class="btn btn-sm btn-danger position-absolute"
+                                                    style="top: 4px; right: 4px; z-index: 2;"
+                                                    onclick="return confirm('Hapus gambar ini?')"
+                                                >
+                                                    &times;
+                                                </button>
+                                                <button
+                                                    type="submit"
+                                                    form="cover-foto-{{ $foto->id }}"
+                                                    class="btn btn-sm btn-light position-absolute"
+                                                    style="bottom: 6px; right: 6px; z-index: 2;"
+                                                    @if ((int) $foto->is_cover === 1) disabled @endif
+                                                >
+                                                    @if ((int) $foto->is_cover === 1)
+                                                        Cover
+                                                    @else
+                                                        Jadikan Cover
+                                                    @endif
+                                                </button>
                                                 @if ((int) $foto->is_cover === 1)
                                                     <span class="badge badge-primary position-absolute" style="top: 6px; left: 6px;">Cover</span>
                                                 @endif
@@ -169,6 +191,29 @@
                     <button type="submit" class="btn btn-primary">Simpan</button>
                 </div>
             </form>
+
+            @if ($wisata->foto && $wisata->foto->count())
+                @foreach ($wisata->foto as $foto)
+                    <form
+                        id="delete-foto-{{ $foto->id }}"
+                        action="{{ route('wisata.foto.destroy', [$wisata, $foto]) }}"
+                        method="POST"
+                        class="d-none"
+                    >
+                        @csrf
+                        @method('DELETE')
+                    </form>
+                    <form
+                        id="cover-foto-{{ $foto->id }}"
+                        action="{{ route('wisata.foto.cover', [$wisata, $foto]) }}"
+                        method="POST"
+                        class="d-none"
+                    >
+                        @csrf
+                        @method('PATCH')
+                    </form>
+                @endforeach
+            @endif
         </div>
     </div>
 
@@ -314,7 +359,16 @@
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
 
-            var marker = L.marker([defaultLat, defaultLng]).addTo(map);
+            var redIcon = new L.Icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            });
+
+            var marker = L.marker([defaultLat, defaultLng], { icon: redIcon }).addTo(map);
 
             function updateMarker() {
                 var lat = parseFloat(latInput.value);

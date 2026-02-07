@@ -94,6 +94,7 @@
                                 <input type="file" name="foto_wisata[]" id="foto_wisata" class="d-none" accept="image/*" multiple>
                             </div>
                             <small class="form-text text-muted">Bisa upload banyak gambar sekaligus.</small>
+                            <input type="hidden" name="cover_index" id="cover_index" value="0">
                         </div>
 
                         <div id="preview" class="mb-3"></div>
@@ -172,8 +173,10 @@
             var dropzone = document.getElementById('dropzone');
             var fileInput = document.getElementById('foto_wisata');
             var preview = document.getElementById('preview');
+            var coverInput = document.getElementById('cover_index');
 
             var filesStore = [];
+            var coverIndex = 0;
 
             function syncInputFiles() {
                 var dataTransfer = new DataTransfer();
@@ -202,6 +205,29 @@
                 btn.innerHTML = '&times;';
                 btn.addEventListener('click', function () {
                     filesStore.splice(index, 1);
+
+                    if (filesStore.length === 0) {
+                        coverIndex = 0;
+                    } else if (index === coverIndex) {
+                        coverIndex = 0;
+                    } else if (index < coverIndex) {
+                        coverIndex = coverIndex - 1;
+                    }
+
+                    renderPreviews();
+                });
+
+                var coverBtn = document.createElement('button');
+                coverBtn.type = 'button';
+                coverBtn.className = 'btn btn-sm btn-light position-absolute';
+                coverBtn.style.bottom = '6px';
+                coverBtn.style.right = '6px';
+                coverBtn.innerText = index === coverIndex ? 'Cover' : 'Jadikan Cover';
+                if (index === coverIndex) {
+                    coverBtn.disabled = true;
+                }
+                coverBtn.addEventListener('click', function () {
+                    coverIndex = index;
                     renderPreviews();
                 });
 
@@ -213,6 +239,16 @@
 
                 wrapper.appendChild(img);
                 wrapper.appendChild(btn);
+                wrapper.appendChild(coverBtn);
+
+                if (index === coverIndex) {
+                    var badge = document.createElement('span');
+                    badge.className = 'badge badge-primary position-absolute';
+                    badge.style.top = '6px';
+                    badge.style.left = '6px';
+                    badge.innerText = 'Cover';
+                    wrapper.appendChild(badge);
+                }
                 col.appendChild(wrapper);
 
                 return col;
@@ -223,7 +259,12 @@
 
                 if (!filesStore.length) {
                     syncInputFiles();
+                    coverInput.value = '0';
                     return;
+                }
+
+                if (coverIndex < 0 || coverIndex >= filesStore.length) {
+                    coverIndex = 0;
                 }
 
                 var row = document.createElement('div');
@@ -237,6 +278,7 @@
                 });
 
                 preview.appendChild(row);
+                coverInput.value = String(coverIndex);
                 syncInputFiles();
             }
 
@@ -247,6 +289,11 @@
                     }
                     filesStore.push(file);
                 });
+
+                if (filesStore.length && (coverIndex < 0 || coverIndex >= filesStore.length)) {
+                    coverIndex = 0;
+                }
+
                 renderPreviews();
             }
 
@@ -290,7 +337,16 @@
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
 
-            var marker = L.marker([defaultLat, defaultLng]).addTo(map);
+            var redIcon = new L.Icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            });
+
+            var marker = L.marker([defaultLat, defaultLng], { icon: redIcon }).addTo(map);
 
             function updateMarker() {
                 var lat = parseFloat(latInput.value);

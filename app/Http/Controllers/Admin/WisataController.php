@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\FotoWisata;
 use App\Models\Kategori;
 use App\Models\Wisata;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -64,6 +66,7 @@ class WisataController extends Controller
             'jml_rating' => ['nullable', 'integer', 'min:0'],
             'foto_wisata' => ['nullable', 'array'],
             'foto_wisata.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'cover_index' => ['nullable', 'integer', 'min:0'],
         ]);
 
         $validated['fasilitas'] = $this->normalizeFasilitas($request->input('fasilitas'));
@@ -73,16 +76,19 @@ class WisataController extends Controller
 
             $files = $request->file('foto_wisata', []);
             if (!empty($files)) {
-                $isFirst = true;
-                foreach ($files as $file) {
+                $coverIndex = (int) $request->input('cover_index', 0);
+                $totalFiles = count($files);
+                if ($coverIndex < 0 || $coverIndex >= $totalFiles) {
+                    $coverIndex = 0;
+                }
+
+                foreach ($files as $index => $file) {
                     $path = $file->store('wisata', 'public');
 
                     $wisata->foto()->create([
                         'url' => $path,
-                        'is_cover' => $isFirst ? 1 : 0,
+                        'is_cover' => $index === $coverIndex ? 1 : 0,
                     ]);
-
-                    $isFirst = false;
                 }
             }
         });
@@ -156,6 +162,46 @@ class WisataController extends Controller
         return redirect()
             ->route('wisata.index')
             ->with('success', 'Data wisata berhasil dihapus.');
+    }
+
+    public function destroyFoto(Wisata $wisata, FotoWisata $foto): RedirectResponse
+    {
+        if ((int) $foto->wisata_id !== (int) $wisata->id) {
+            abort(404);
+        }
+
+        DB::transaction(function () use ($wisata, $foto): void {
+            $wasCover = (int) $foto->is_cover === 1;
+
+            if ($foto->url) {
+                Storage::disk('public')->delete($foto->url);
+            }
+
+            $foto->delete();
+
+            if ($wasCover) {
+                $newCover = $wisata->foto()->orderBy('id')->first();
+                if ($newCover) {
+                    $newCover->update(['is_cover' => 1]);
+                }
+            }
+        });
+
+        return back()->with('success', 'Gambar berhasil dihapus.');
+    }
+
+    public function setCover(Wisata $wisata, FotoWisata $foto): RedirectResponse
+    {
+        if ((int) $foto->wisata_id !== (int) $wisata->id) {
+            abort(404);
+        }
+
+        DB::transaction(function () use ($wisata, $foto): void {
+            $wisata->foto()->update(['is_cover' => 0]);
+            $foto->update(['is_cover' => 1]);
+        });
+
+        return back()->with('success', 'Gambar cover berhasil diperbarui.');
     }
 
     private function normalizeFasilitas(mixed $input): array

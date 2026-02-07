@@ -33,6 +33,12 @@ Route::resource('wisata', WisataController::class)->parameters([
     'wisata' => 'wisata',
 ]);
 
+Route::delete('wisata/{wisata}/foto/{foto}', [WisataController::class, 'destroyFoto'])
+    ->name('wisata.foto.destroy');
+
+Route::patch('wisata/{wisata}/foto/{foto}/cover', [WisataController::class, 'setCover'])
+    ->name('wisata.foto.cover');
+
 Route::resource('kategori', KategoriController::class)->parameters([
     'kategori' => 'kategori',
 ]);
