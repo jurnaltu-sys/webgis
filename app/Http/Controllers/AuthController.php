@@ -72,11 +72,17 @@ class AuthController extends Controller
                 'user_role' => $user?->role,
             ]);
 
-            $redirectRoute = $user?->role === 'wisatawan'
-                ? route('dashboard-wisatawan.index')
-                : route('wisata.index');
+            // Custom redirect logic for wisatawan
+            if ($user?->role === 'wisatawan') {
+                $rattingCount = \App\Models\Ratting::where('user_id', $user->id)->count();
+                if ($rattingCount < 5) {
+                    return redirect()->route('rattings-wisatawan.index');
+                } else {
+                    return redirect()->route('dashboard-wisatawan.index');
+                }
+            }
 
-            return redirect()->intended($redirectRoute);
+            return redirect()->route('wisata.index');
         }
 
         return back()

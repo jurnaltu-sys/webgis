@@ -8,6 +8,7 @@ use App\Models\Wisata;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 class RattingWisatawanController extends Controller
 {
@@ -46,7 +47,16 @@ class RattingWisatawanController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('wisatawan.rattings_wisatawan.index', compact('rattings', 'query'));
+        $wisata = Wisata::with('foto')->orderBy('nama')->get();
+        $ratedWisataIds = Ratting::where('user_id', $userId)
+            ->pluck('wisata_id')
+            ->unique()
+            ->values()
+            ->all();
+
+        $userRattingCount = Ratting::where('user_id', $userId)->count();
+
+        return view('wisatawan.rattings_wisatawan.index', compact('rattings', 'query', 'wisata', 'ratedWisataIds', 'userRattingCount'));
     }
 
     public function create(): View
@@ -56,7 +66,7 @@ class RattingWisatawanController extends Controller
         return view('wisatawan.rattings_wisatawan.create', compact('wisata'));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): Response
     {
         $validated = $request->validate([
             'wisata_id' => ['required', 'integer', 'min:1', 'exists:wisata,id'],
@@ -66,7 +76,25 @@ class RattingWisatawanController extends Controller
 
         $validated['user_id'] = (int) (session('user.id') ?? session('user_id', 0));
 
-        Ratting::create($validated);
+        $ratting = Ratting::create($validated);
+
+        if ($request->expectsJson()) {
+            $ratting->load('wisata');
+
+            return response()->json([
+                'message' => 'Ratting berhasil ditambahkan.',
+                'wisata_id' => (int) $validated['wisata_id'],
+                'ratting' => [
+                    'id' => (int) $ratting->id,
+                    'wisata_nama' => $ratting->wisata?->nama,
+                    'ratting' => (int) $ratting->ratting,
+                    'ulasan' => $ratting->ulasan,
+                    'show_url' => route('rattings-wisatawan.show', $ratting),
+                    'edit_url' => route('rattings-wisatawan.edit', $ratting),
+                    'destroy_url' => route('rattings-wisatawan.destroy', $ratting),
+                ],
+            ], 201);
+        }
 
         return redirect()
             ->route('rattings-wisatawan.index')
@@ -111,10 +139,16 @@ class RattingWisatawanController extends Controller
             ->with('success', 'Ratting berhasil diperbarui.');
     }
 
-    public function destroy(Ratting $rattings_wisatawan): RedirectResponse
+    public function destroy(Request $request, Ratting $rattings_wisatawan): Response
     {
         $this->ensureOwnership($rattings_wisatawan);
         $rattings_wisatawan->delete();
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'message' => 'Ratting berhasil dihapus.',
+            ]);
+        }
 
         return redirect()
             ->route('rattings-wisatawan.index')
