@@ -256,5 +256,10 @@ class WisataController extends Controller
         }
     }
 
+    public function showImportForm(): View
+    {
+        return view('admin.wisata.import');
+    }
+
     // normalizeFasilitas dihapus karena tidak diperlukan lagi
 }

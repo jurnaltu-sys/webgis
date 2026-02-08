@@ -34,7 +34,8 @@ Route::resource('wisata', WisataController::class)->parameters([
     'wisata' => 'wisata',
 ]);
 
-Route::post('wisata/import', [WisataController::class, 'import'])->name('wisata.import');
+Route::get('admin/wisata/import', [WisataController::class, 'showImportForm'])->name('wisata.import.form');
+Route::post('admin/wisata/import', [WisataController::class, 'import'])->name('wisata.import');
 
 Route::delete('wisata/{wisata}/foto/{foto}', [WisataController::class, 'destroyFoto'])
     ->name('wisata.foto.destroy');

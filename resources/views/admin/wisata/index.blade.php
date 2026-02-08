@@ -3,25 +3,10 @@
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="h4 mb-0">Data Wisata</h1>
-        <a href="{{ route('wisata.create') }}" class="btn btn-primary">Tambah</a>
-    </div>
-
-    @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
-
-    @if($errors->has('file'))
-        <div class="alert alert-danger">{{ $errors->first('file') }}</div>
-    @endif
-
-    <div class="mb-3">
-        <form action="{{ route('wisata.import') }}" method="POST" enctype="multipart/form-data" class="form-inline">
-            @csrf
-            <div class="form-group mr-2">
-                <input type="file" name="file" accept=".xlsx,.xls,.csv" class="form-control-file">
-            </div>
-            <button type="submit" class="btn btn-outline-primary">Import Excel</button>
-        </form>
+        <div>
+            <a href="{{ route('wisata.import.form') }}" class="btn btn-secondary mr-2">Import Excel</a>
+            <a href="{{ route('wisata.create') }}" class="btn btn-primary">Tambah</a>
+        </div>
     </div>
 
     <form method="GET" action="{{ route('wisata.index') }}" class="mb-3">
