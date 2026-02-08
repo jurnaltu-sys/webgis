@@ -3,7 +3,10 @@
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="h4 mb-0">Data Ratting</h1>
-        <a href="{{ route('rattings.create') }}" class="btn btn-primary">Tambah</a>
+        <div>
+            <a href="{{ route('rattings.import.form') }}" class="btn btn-secondary mr-2">Import</a>
+            <a href="{{ route('rattings.create') }}" class="btn btn-primary">Tambah</a>
+        </div>
     </div>
 
     <form method="GET" action="{{ route('rattings.index') }}" class="mb-3">
