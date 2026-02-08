@@ -32,9 +32,10 @@ class RattingsImportController extends Controller
                     ->with('success', "Import selesai. Berhasil menambah {$created} data. Beberapa baris dilewati.");
             }
 
-            return redirect()->route('rattings.index')->with('success', 'Import rattings berhasil.');
+            return redirect()->route('rattings.excelview')->with('success', 'Import rattings berhasil.');
         } catch (\Exception $e) {
-            return back()->withErrors(['file' => 'Import gagal: ' . $e->getMessage()]);
+            return redirect()->route('rattings.import.form')
+                ->withErrors(['file' => 'Import gagal: ' . $e->getMessage()]);
         }
     }
 }

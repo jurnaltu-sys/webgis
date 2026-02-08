@@ -115,7 +115,12 @@ class RattingController extends Controller
      */
     public function excelView(): View
     {
-        $users = User::where('role', 'wisatawan')->orderBy('name')->get();
+        $userId = request('user_id');
+        $usersQuery = User::where('role', 'wisatawan')->orderBy('name');
+        if ($userId) {
+            $usersQuery->where('id', $userId);
+        }
+        $users = $usersQuery->get();
         $wisataList = Wisata::orderBy('nama')->get();
         $rattings = Ratting::get();
         $pivot = [];

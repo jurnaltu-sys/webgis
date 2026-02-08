@@ -2,10 +2,51 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="mb-3">
-        <a href="{{ route('rattings.index') }}" class="btn btn-secondary">&larr; Kembali</a>
+    <div class="mb-3 d-flex justify-content-end align-items-center">
+        <form method="GET" action="{{ route('rattings.excelview') }}" class="form-inline mr-2">
+            <select name="user_id" id="user_id_select" class="form-control mr-2" style="min-width:220px">
+                <option value="">-- Pilih User --</option>
+                @foreach($users as $userOption)
+                    <option value="{{ $userOption->id }}" @if(request('user_id') == $userOption->id) selected @endif>
+                        {{ $userOption->name }} ({{ $userOption->email }})
+                    </option>
+                @endforeach
+            </select>
+            <button class="btn btn-primary" type="submit">Cari</button>
+            @if(request('user_id'))
+                <a href="{{ route('rattings.excelview') }}" class="btn btn-outline-danger ml-2">Delete</a>
+            @endif
+        </form>
+        <a href="{{ route('rattings.import.form') }}" class="btn btn-secondary">Import</a>
+        @push('scripts')
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                $('#user_id_select').select2({
+                    placeholder: 'Cari user...',
+                    allowClear: true
+                });
+            });
+        </script>
+        @endpush
     </div>
-    <h3 class="mb-4">Format Dataset</h3>
+           
+        </form>
+        @push('scripts')
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                $('#user_id_select').select2({
+                    placeholder: 'Cari user...',
+                    allowClear: true
+                });
+            });
+        </script>
+        @endpush
+    </div>
+    <h3 class="mb-4">Ratting Format Dataset</h3>
     <div class="table-responsive">
         <table class="table table-bordered table-sm">
             <thead class="thead-light">

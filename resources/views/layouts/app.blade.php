@@ -29,8 +29,8 @@
                     <li class="nav-item {{ request()->routeIs('users.*') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ route('users.index') }}">Users</a>
                     </li>
-                    <li class="nav-item {{ request()->routeIs('rattings.*') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('rattings.index') }}">Ratting</a>
+                    <li class="nav-item {{ request()->routeIs('admin/rattings/excelview.*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ route('rattings.excelview') }}">Ratting</a>
                     </li>
                 @elseif ($userRole === 'wisatawan')
                     <li class="nav-item {{ request()->routeIs('dashboard-wisatawan.*') ? 'active' : '' }}">
