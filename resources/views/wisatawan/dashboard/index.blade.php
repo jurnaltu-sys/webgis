@@ -105,7 +105,7 @@
 
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <span>Ratting Terbaru</span>
+                    <span>Ratting Saya</span>
                     <a href="{{ route('rattings-wisatawan.index') }}" class="btn btn-sm btn-outline-primary">Lihat Semua</a>
                 </div>
                 <div class="card-body p-0">

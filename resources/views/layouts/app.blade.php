@@ -39,6 +39,12 @@
                     <li class="nav-item {{ request()->routeIs('rattings-wisatawan.*') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ route('rattings-wisatawan.index') }}">Ratting Saya</a>
                     </li>
+                    <li class="nav-item {{ request()->routeIs('wisatawan-wisata.*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ route('wisatawan-wisata.index') }}">Wisata</a>
+                    </li>
+                    <li class="nav-item {{ request()->routeIs('wisatawan.rattings.dataset') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ route('wisatawan.rattings.dataset') }}">Format Dataset</a>
+                    </li>
                 @endif
             </ul>
             <ul class="navbar-nav ml-auto">

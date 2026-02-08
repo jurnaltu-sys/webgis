@@ -43,4 +43,16 @@ class Wisata extends Model
     {
         return $this->belongsTo(Kategori::class, 'kategori_id');
     }
+
+    /**
+     * Ambil foto utama wisata (jika ada), jika tidak ada, gunakan gambar default.
+     */
+    public function fotoUtama()
+    {
+        $foto = $this->foto()->first();
+        if ($foto && $foto->path) {
+            return asset('storage/' . $foto->path);
+        }
+        return asset('images/default-wisata.jpg');
+    }
 }

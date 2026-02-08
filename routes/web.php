@@ -10,6 +10,7 @@ use App\Http\Controllers\Wisatawan\DashboardWisatawanController;
 use App\Http\Controllers\Wisatawan\RattingWisatawanController;
 use App\Http\Controllers\UsersImportController;
 use App\Http\Controllers\RattingsImportController;
+use App\Http\Controllers\Wisatawan\RattingDatasetWisatawanController;
 
 
 // Form input/edit seluruh ratting 1 user (pivot style)
@@ -40,6 +41,11 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::resource('wisata', WisataController::class)->parameters([
     'wisata' => 'wisata',
 ]);
+
+// Wisatawan hanya bisa lihat (index, show)
+Route::resource('wisatawan-wisata', App\Http\Controllers\Wisatawan\WisatawanWisataController::class)
+    ->only(['index', 'show'])
+    ->parameters(['wisatawan-wisata' => 'wisata']);
 
 Route::get('admin/wisata/import', [WisataController::class, 'showImportForm'])->name('wisata.import.form');
 Route::post('admin/wisata/import', [WisataController::class, 'import'])->name('wisata.import');
@@ -83,3 +89,7 @@ Route::get('admin/rattings/import', [RattingsImportController::class, 'showForm'
 
 Route::post('admin/rattings/import', [RattingsImportController::class, 'import'])
     ->name('rattings.import');
+
+// Ratting Format Dataset untuk wisatawan (lihat-only)
+Route::get('wisatawan/rattings/dataset', [App\Http\Controllers\Wisatawan\RattingDatasetWisatawanController::class, 'index'])
+    ->name('wisatawan.rattings.dataset');
