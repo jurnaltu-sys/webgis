@@ -56,6 +56,9 @@ Route::resource('rattings', RattingController::class)->parameters([
     'rattings' => 'ratting',
 ]);
 
+Route::get('admin/rattings/excelview', [App\Http\Controllers\Admin\RattingController::class, 'excelView'])
+    ->name('rattings.excelview');
+
 Route::resource('rattings-wisatawan', RattingWisatawanController::class)->parameters([
     'rattings-wisatawan' => 'rattings_wisatawan',
 ]);

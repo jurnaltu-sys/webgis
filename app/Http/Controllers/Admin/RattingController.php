@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
+
 class RattingController extends Controller
 {
     public function __construct()
@@ -18,7 +19,6 @@ class RattingController extends Controller
             if (session('user_role') !== 'admin') {
                 return redirect()->route('login');
             }
-
             return $next($request);
         });
     }
@@ -26,9 +26,7 @@ class RattingController extends Controller
     public function index(Request $request): View
     {
         $query = trim((string) $request->query('q', ''));
-
         $rattingQuery = Ratting::with(['user', 'wisata']);
-
         if ($query !== '') {
             $rattingQuery->where(function ($builder) use ($query) {
                 $builder->where('ulasan', 'like', "%{$query}%")
@@ -43,12 +41,10 @@ class RattingController extends Controller
                     });
             });
         }
-
         $rattings = $rattingQuery
             ->orderBy('id', 'desc')
             ->paginate(10)
             ->withQueryString();
-
         return view('admin.rattings.index', compact('rattings', 'query'));
     }
 
@@ -58,7 +54,6 @@ class RattingController extends Controller
             ->orderBy('name')
             ->get();
         $wisata = Wisata::orderBy('nama')->get();
-
         return view('admin.rattings.create', compact('users', 'wisata'));
     }
 
@@ -70,9 +65,7 @@ class RattingController extends Controller
             'ratting' => ['required', 'integer', 'min:1', 'max:5'],
             'ulasan' => ['nullable', 'string'],
         ]);
-
         Ratting::create($validated);
-
         return redirect()
             ->route('rattings.index')
             ->with('success', 'Ratting berhasil ditambahkan.');
@@ -81,7 +74,6 @@ class RattingController extends Controller
     public function show(Ratting $ratting): View
     {
         $ratting->load(['user', 'wisata']);
-
         return view('admin.rattings.show', compact('ratting'));
     }
 
@@ -91,7 +83,6 @@ class RattingController extends Controller
             ->orderBy('name')
             ->get();
         $wisata = Wisata::orderBy('nama')->get();
-
         return view('admin.rattings.edit', compact('ratting', 'users', 'wisata'));
     }
 
@@ -103,9 +94,7 @@ class RattingController extends Controller
             'ratting' => ['required', 'integer', 'min:1', 'max:5'],
             'ulasan' => ['nullable', 'string'],
         ]);
-
         $ratting->update($validated);
-
         return redirect()
             ->route('rattings.index')
             ->with('success', 'Ratting berhasil diperbarui.');
@@ -114,9 +103,27 @@ class RattingController extends Controller
     public function destroy(Ratting $ratting): RedirectResponse
     {
         $ratting->delete();
-
         return redirect()
             ->route('rattings.index')
             ->with('success', 'Ratting berhasil dihapus.');
+    }
+
+    /**
+     * Show rattings in pivot table format: user as row, wisata as column, ratting as cell.
+     */
+    public function excelView(): View
+    {
+        $users = User::where('role', 'wisatawan')->orderBy('name')->get();
+        $wisataList = Wisata::orderBy('nama')->get();
+        $rattings = Ratting::get();
+        $pivot = [];
+        foreach ($rattings as $rat) {
+            $pivot[$rat->user_id][$rat->wisata_id] = $rat->ratting;
+        }
+        return view('admin.rattings.excelview', [
+            'users' => $users,
+            'wisataList' => $wisataList,
+            'pivot' => $pivot,
+        ]);
     }
 }
