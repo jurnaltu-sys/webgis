@@ -241,5 +241,20 @@ class WisataController extends Controller
         return back()->with('success', 'Gambar cover berhasil diperbarui.');
     }
 
+    public function import(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv',
+        ]);
+
+        try {
+            app('excel')->import(new \App\Imports\WisataImport, $request->file('file'));
+
+            return redirect()->route('wisata.index')->with('success', 'Import wisata berhasil.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['file' => 'Import gagal: ' . $e->getMessage()]);
+        }
+    }
+
     // normalizeFasilitas dihapus karena tidak diperlukan lagi
 }

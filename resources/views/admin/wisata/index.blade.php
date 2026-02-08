@@ -6,6 +6,24 @@
         <a href="{{ route('wisata.create') }}" class="btn btn-primary">Tambah</a>
     </div>
 
+    @if(session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+
+    @if($errors->has('file'))
+        <div class="alert alert-danger">{{ $errors->first('file') }}</div>
+    @endif
+
+    <div class="mb-3">
+        <form action="{{ route('wisata.import') }}" method="POST" enctype="multipart/form-data" class="form-inline">
+            @csrf
+            <div class="form-group mr-2">
+                <input type="file" name="file" accept=".xlsx,.xls,.csv" class="form-control-file">
+            </div>
+            <button type="submit" class="btn btn-outline-primary">Import Excel</button>
+        </form>
+    </div>
+
     <form method="GET" action="{{ route('wisata.index') }}" class="mb-3">
         <div class="input-group">
             <input type="text" name="q" value="{{ $query ?? '' }}" class="form-control" placeholder="Cari nama wisata...">
