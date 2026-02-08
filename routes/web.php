@@ -47,6 +47,11 @@ Route::resource('wisatawan-wisata', App\Http\Controllers\Wisatawan\WisatawanWisa
     ->only(['index', 'show'])
     ->parameters(['wisatawan-wisata' => 'wisata']);
 
+// Halaman Rekomendasi untuk wisatawan
+use App\Http\Controllers\Wisatawan\RekomendasiWisatawanController;
+Route::get('rekomendasi-wisatawan', [RekomendasiWisatawanController::class, 'index'])
+    ->name('rekomendasi-wisatawan.index');
+
 Route::get('admin/wisata/import', [WisataController::class, 'showImportForm'])->name('wisata.import.form');
 Route::post('admin/wisata/import', [WisataController::class, 'import'])->name('wisata.import');
 
