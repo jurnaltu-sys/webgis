@@ -2,6 +2,20 @@
 
 @push('styles')
     <style>
+        /* Scrollable modal for Interest-based Onboarding */
+        #interestOnboardingModal .modal-dialog {
+            max-width: 900px;
+        }
+        #interestOnboardingModal .modal-content {
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        #interestOnboardingModal .modal-body {
+            overflow-y: auto;
+            max-height: 60vh;
+        }
         .onboarding-wisata-card {
             height: 100%;
         }
@@ -28,15 +42,80 @@
             border-color: #ced4da;
             background: #f8f9fa;
         }
+            /* Overlay for onboarding modal when Ratting modal is shown */
+            #interestOnboardingModal .onboarding-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                z-index: 1051;
+                pointer-events: none;
+            }
     </style>
 @endpush
 @push('scripts')
     <script>
         $(function () {
+                        // Prevent quick rating modal after delete
+                        var suppressQuickRatingModal = false;
+
             var $currentCard = null;
             var $quickForm = $('#quickRatingForm');
             var $quickSubmit = $quickForm.closest('.modal-content').find('button[type="submit"]');
             var csrfToken = '{{ csrf_token() }}';
+            // Delete ratting from onboarding modal
+            $(document).off('submit.rattingsOnboarding').on('submit.rattingsOnboarding', '.js-delete-rating-onboarding', function (event) {
+                event.preventDefault();
+                var form = this;
+                if (!window.confirm('Hapus data ini?')) {
+                    return;
+                }
+                var $card = $(form).closest('.onboarding-wisata-card');
+                if ($card.data('deleting')) {
+                    return;
+                }
+                $card.data('deleting', true);
+                fetch(form.action, {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    credentials: 'same-origin'
+                })
+                    .then(function (response) {
+                        if (!response.ok && response.status !== 302) {
+                            throw new Error('Gagal menghapus ratting.');
+                        }
+                        return response.text();
+                    })
+                    .then(function () {
+                        $card.removeClass('is-rated').addClass('is-unrated');
+                        $(form).remove();
+                        suppressQuickRatingModal = true;
+                        $('#quickRatingModal').modal('hide');
+                        setTimeout(function(){ suppressQuickRatingModal = false; }, 1000);
+                            // Hapus baris pada tabel secara realtime
+                            var wisataId = $card.data('wisata-id');
+                            var $tableBody = $('#rattingsTable tbody');
+                            var $row = $tableBody.find('tr').filter(function() {
+                                return $(this).find('td').eq(1).text().trim() === $card.data('wisata-nama');
+                            });
+                            $row.remove();
+                            if ($tableBody.find('tr').length === 0) {
+                                $tableBody.append('<tr><td colspan="5" class="text-center">Belum ada data.</td></tr>');
+                            }
+                    })
+                    .catch(function (error) {
+                        alert(error.message || 'Gagal menghapus ratting.');
+                    })
+                    .finally(function () {
+                        $card.removeData('deleting');
+                    });
+            });
 
             function escapeHtml(value) {
                 return String(value || '').replace(/[&<>"]/g, function (char) {
@@ -60,7 +139,7 @@
                 return text.substring(0, maxLength) + '...';
             }
 
-            function prependRattingRow(ratting) {
+            function appendRattingRow(ratting) {
                 if (!ratting || !ratting.id) {
                     return;
                 }
@@ -68,26 +147,30 @@
                 var wisataNama = escapeHtml(ratting.wisata_nama || '-');
                 var ulasan = escapeHtml(limitText(ratting.ulasan, 60));
 
+                var $tableBody = $('#rattingsTable tbody');
+                $tableBody.find('tr td[colspan="5"]').closest('tr').remove();
+
+                // Calculate the next row number
+                var nextNo = $tableBody.find('tr').length + 1;
+
                 var rowHtml = ''
                     + '<tr>'
-                    + '<td>' + ratting.id + '</td>'
+                    + '<td>' + nextNo + '</td>'
                     + '<td>' + wisataNama + '</td>'
                     + '<td>' + ratting.ratting + '</td>'
                     + '<td>' + ulasan + '</td>'
                     + '<td>'
-                    + '<a href="' + ratting.show_url + '" class="btn btn-sm btn-info">Detail</a> '
-                    + '<a href="' + ratting.edit_url + '" class="btn btn-sm btn-warning">Edit</a> '
-                    + '<form action="' + ratting.destroy_url + '" method="POST" class="d-inline js-delete-rating" onsubmit="return confirm(\'Hapus data ini?\')">'
+                    + '<a style="display:none" href="' + ratting.show_url + '" class="btn btn-sm btn-info">Detail</a> '
+                    + '<a  href="' + ratting.edit_url + '" class="btn btn-sm btn-warning">Edit</a> '
+                    + '<form  action="' + ratting.destroy_url + '" method="POST" class="d-inline js-delete-rating" onsubmit="return confirm(\'Hapus data ini?\')">'
                     + '<input type="hidden" name="_token" value="' + csrfToken + '">'
                     + '<input type="hidden" name="_method" value="DELETE">'
-                    + '<button type="submit" class="btn btn-sm btn-danger">Hapus</button>'
+                    + '<button style="display:none" type="submit" class="btn btn-sm btn-danger">Hapus</button>'
                     + '</form>'
                     + '</td>'
                     + '</tr>';
 
-                var $tableBody = $('#rattingsTable tbody');
-                $tableBody.find('tr td[colspan="5"]').closest('tr').remove();
-                $tableBody.prepend(rowHtml);
+                $tableBody.append(rowHtml);
             }
 
             // Use .off() before .on() to prevent duplicate bindings
@@ -137,6 +220,10 @@
             });
 
             $('.js-open-quick-rating').off('click.rattings').on('click.rattings', function () {
+                if (suppressQuickRatingModal) {
+                    suppressQuickRatingModal = false;
+                    return;
+                }
                 var wisataId = $(this).data('wisata-id');
                 var wisataNama = $(this).data('wisata-nama');
 
@@ -187,11 +274,22 @@
                             }
                             if ($target && $target.length) {
                                 $target.removeClass('is-unrated').addClass('is-rated');
+                                 
+                                    var $cardBody = $target.find('.card-body');
+                                    if ($cardBody.find('.js-delete-rating-onboarding').length === 0 && data.ratting && data.ratting.destroy_url) {
+                                        var deleteFormHtml = ''
+                                            + '<form action="' + data.ratting.destroy_url + '" method="POST" class="mt-2 js-delete-rating-onboarding" data-wisata-id="' + wisataId + '" onsubmit="return confirm(\'Hapus data ini?\')">'
+                                            + '<input type="hidden" name="_token" value="' + csrfToken + '">' 
+                                            + '<input type="hidden" name="_method" value="DELETE">'
+                                            + '<button type="submit" class="btn btn-sm btn-danger">Hapus</button>'
+                                            + '</form>';
+                                        $cardBody.append(deleteFormHtml);
+                                    }
                             }
                         }
 
                         if (data && data.ratting) {
-                            prependRattingRow(data.ratting);
+                            appendRattingRow(data.ratting);
                         }
 
                         $('#quickRatingModal').modal('hide');
@@ -212,6 +310,20 @@
             } else {
                 $('#interestOnboardingModal').modal('hide');
             }
+
+                // Overlay logic: make onboarding modal darker when Ratting modal is shown
+                var $onboardingModal = $('#interestOnboardingModal');
+                var overlayHtml = '<div class="onboarding-overlay"></div>';
+                $('#quickRatingModal').on('show.bs.modal', function () {
+                    // Add overlay if not already present
+                    if ($onboardingModal.find('.onboarding-overlay').length === 0) {
+                        $onboardingModal.find('.modal-content').append(overlayHtml);
+                    }
+                });
+                $('#quickRatingModal').on('hidden.bs.modal', function () {
+                    // Remove overlay
+                    $onboardingModal.find('.onboarding-overlay').remove();
+                });
         });
     </script>
 @endpush
@@ -220,12 +332,12 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="h4 mb-0">Ratting Saya</h1>
         <div class="d-flex align-items-center">
-            @if ($userRattingCount < 5)
-                <button type="button" class="btn btn-outline-primary mr-2" data-toggle="modal" data-target="#interestOnboardingModal">
-                    Interest-based Onboarding
-                </button>
-            @endif
+            <button type="button" class="btn btn-primary mr-2" data-toggle="modal" data-target="#interestOnboardingModal">
+                Tambah
+            </button>
+            <!--
             <a href="{{ route('rattings-wisatawan.create') }}" class="btn btn-primary">Tambah</a>
+            -->
         </div>
     </div>
 
@@ -247,7 +359,7 @@
                 <table class="table table-striped mb-0" id="rattingsTable">
                     <thead class="thead-dark">
                         <tr>
-                            <th style="width: 80px;">ID</th>
+                            <th style="width: 80px;">No</th>
                             <th>Wisata</th>
                             <th style="width: 120px;">Ratting</th>
                             <th>Ulasan</th>
@@ -257,18 +369,20 @@
                     <tbody>
                         @forelse ($rattings as $item)
                             <tr>
-                                <td>{{ $item->id }}</td>
+                                <td>{{ $loop->iteration }}</td>
                                 <td>{{ $item->wisata?->nama ?? '-' }}</td>
                                 <td>{{ $item->ratting }}</td>
                                 <td>{{ $item->ulasan ? \Illuminate\Support\Str::limit($item->ulasan, 60) : '-' }}</td>
                                 <td>
-                                    <a href="{{ route('rattings-wisatawan.show', $item) }}" class="btn btn-sm btn-info">Detail</a>
+                                    <a style="display:none" href="{{ route('rattings-wisatawan.show', $item) }}" class="btn btn-sm btn-info">Detail</a>
+
                                     <a href="{{ route('rattings-wisatawan.edit', $item) }}" class="btn btn-sm btn-warning">Edit</a>
                                     <form action="{{ route('rattings-wisatawan.destroy', $item) }}" method="POST" class="d-inline js-delete-rating" onsubmit="return confirm('Hapus data ini?')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                        <button style="display:none" type="submit" class="btn btn-sm btn-danger">Hapus</button>
                                     </form>
+                             
                                 </td>
                             </tr>
                         @empty
@@ -310,6 +424,18 @@
                                     <img src="{{ $imageUrl }}" class="card-img-top" alt="{{ $item->nama }}">
                                     <div class="card-body py-2">
                                         <div class="font-weight-bold">{{ $item->nama }}</div>
+                                        @if($isRated)
+                                            @php
+                                                $ratting = \App\Models\Ratting::where('user_id', (int) (session('user.id') ?? session('user_id', 0)))->where('wisata_id', $item->id)->first();
+                                            @endphp
+                                            @if($ratting)
+                                                <form action="{{ route('rattings-wisatawan.destroy', $ratting->id) }}" method="POST" class="mt-2 js-delete-rating-onboarding" data-wisata-id="{{ $item->id }}" onsubmit="return confirm('Hapus data ini?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                                </form>
+                                            @endif
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -331,7 +457,7 @@
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="quickRatingModalLabel">Tambah Ratting</h5>
+                    <h5 class="modal-title" id="quickRatingModalLabel">Ratting</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>

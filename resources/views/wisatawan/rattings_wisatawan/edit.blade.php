@@ -19,23 +19,24 @@
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label for="wisata_id">Wisata</label>
-                        <select name="wisata_id" id="wisata_id" class="form-control select2 @error('wisata_id') is-invalid @enderror" required>
-                            <option value="">Pilih wisata</option>
-                            @foreach ($wisata as $item)
-                                @php
-                                    $photos = $item->foto->map(function ($foto) {
-                                        return asset('storage/' . $foto->url);
-                                    })->values();
-                                @endphp
-                                <option
-                                    value="{{ $item->id }}"
-                                    data-photos='@json($photos)'
-                                    {{ (string) old('wisata_id', $ratting->wisata_id) === (string) $item->id ? 'selected' : '' }}
-                                >
-                                    {{ $item->nama }}
-                                </option>
-                            @endforeach
-                        </select>
+                            <select name="wisata_id" id="wisata_id" class="form-control select2 @error('wisata_id') is-invalid @enderror" required disabled>
+                                <option value="">Pilih wisata</option>
+                                @foreach ($wisata as $item)
+                                    @php
+                                        $photos = $item->foto->map(function ($foto) {
+                                            return asset('storage/' . $foto->url);
+                                        })->values();
+                                    @endphp
+                                    <option
+                                        value="{{ $item->id }}"
+                                        data-photos='@json($photos)'
+                                        {{ (string) old('wisata_id', $ratting->wisata_id) === (string) $item->id ? 'selected' : '' }}
+                                    >
+                                        {{ $item->nama }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <input type="hidden" name="wisata_id" value="{{ old('wisata_id', $ratting->wisata_id) }}">
                         @error('wisata_id')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror

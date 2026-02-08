@@ -24,7 +24,7 @@ class DashboardWisatawan
                 $builder->where('nama', 'like', "%{$query}%");
             })
             ->orderBy('nama')
-            ->take(10)
+            ->take(20)
             ->get();
 
         return [

@@ -25,6 +25,8 @@ return new class extends Migration
             $table->foreign('wisata_id')
                 ->references('id')
                 ->on('wisata');
+
+            $table->unique(['user_id', 'wisata_id'], 'user_wisata_unique');
         });
     }
 

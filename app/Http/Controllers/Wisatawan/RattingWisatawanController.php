@@ -68,13 +68,25 @@ class RattingWisatawanController extends Controller
 
     public function store(Request $request): Response
     {
+        $userId = (int) (session('user.id') ?? session('user_id', 0));
         $validated = $request->validate([
-            'wisata_id' => ['required', 'integer', 'min:1', 'exists:wisata,id'],
+            'wisata_id' => [
+                'required',
+                'integer',
+                'min:1',
+                'exists:wisata,id',
+                // pastikan kombinasi user_id dan wisata_id unik
+                function ($attribute, $value, $fail) use ($userId) {
+                    if (Ratting::where('user_id', $userId)->where('wisata_id', $value)->exists()) {
+                        $fail('Anda sudah memberikan ratting untuk wisata ini.');
+                    }
+                },
+            ],
             'ratting' => ['required', 'integer', 'min:1', 'max:5'],
             'ulasan' => ['nullable', 'string'],
         ]);
 
-        $validated['user_id'] = (int) (session('user.id') ?? session('user_id', 0));
+        $validated['user_id'] = $userId;
 
         $ratting = Ratting::create($validated);
 
@@ -126,8 +138,24 @@ class RattingWisatawanController extends Controller
     {
         $this->ensureOwnership($rattings_wisatawan);
 
+
+        $userId = (int) (session('user.id') ?? session('user_id', 0));
         $validated = $request->validate([
-            'wisata_id' => ['required', 'integer', 'min:1', 'exists:wisata,id'],
+            'wisata_id' => [
+                'required',
+                'integer',
+                'min:1',
+                'exists:wisata,id',
+                // pastikan kombinasi user_id dan wisata_id unik kecuali untuk record ini sendiri
+                function ($attribute, $value, $fail) use ($userId, $rattings_wisatawan) {
+                    if (Ratting::where('user_id', $userId)
+                        ->where('wisata_id', $value)
+                        ->where('id', '!=', $rattings_wisatawan->id)
+                        ->exists()) {
+                        $fail('Anda sudah memberikan ratting untuk wisata ini.');
+                    }
+                },
+            ],
             'ratting' => ['required', 'integer', 'min:1', 'max:5'],
             'ulasan' => ['nullable', 'string'],
         ]);

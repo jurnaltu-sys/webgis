@@ -116,7 +116,7 @@
                                     <th>Wisata</th>
                                     <th style="width: 120px;">Ratting</th>
                                     <th>Ulasan</th>
-                                    <th style="width: 120px;">Aksi</th>
+                                    <th style="width: 120px;display:none">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -125,7 +125,7 @@
                                         <td>{{ $item->wisata?->nama ?? '-' }}</td>
                                         <td>{{ $item->ratting }}</td>
                                         <td>{{ $item->ulasan ? \Illuminate\Support\Str::limit($item->ulasan, 60) : '-' }}</td>
-                                        <td>
+                                        <td style="display:none">
                                             <a href="{{ route('rattings-wisatawan.show', $item) }}" class="btn btn-sm btn-info">Detail</a>
                                         </td>
                                     </tr>
