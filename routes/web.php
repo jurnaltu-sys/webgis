@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WisataController;
 use App\Http\Controllers\Wisatawan\DashboardWisatawanController;
 use App\Http\Controllers\Wisatawan\RattingWisatawanController;
+use App\Http\Controllers\UsersImportController;
 
 Route::get('/', function () {
     $role = session('user_role');
@@ -57,3 +58,9 @@ Route::resource('rattings-wisatawan', RattingWisatawanController::class)->parame
 
 Route::get('dashboard-wisatawan', [DashboardWisatawanController::class, 'index'])
     ->name('dashboard-wisatawan.index');
+
+Route::get('admin/users/import', [UsersImportController::class, 'showForm'])
+    ->name('users.import.form');
+
+Route::post('admin/users/import', [UsersImportController::class, 'import'])
+    ->name('users.import');
