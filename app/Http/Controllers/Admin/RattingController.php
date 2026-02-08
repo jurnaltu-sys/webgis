@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 
+
+
 class RattingController extends Controller
 {
     public function __construct()
@@ -125,5 +127,58 @@ class RattingController extends Controller
             'wisataList' => $wisataList,
             'pivot' => $pivot,
         ]);
+    }
+    /**
+     * Show form to edit/add all ratting for a user (pivot style).
+     */
+    public function editExcelUser($userId): View
+    {
+        $user = User::findOrFail($userId);
+        $wisataList = Wisata::orderBy('nama')->get();
+        // Ambil ratting existing untuk user ini
+        $rattings = Ratting::where('user_id', $userId)->get()->keyBy('wisata_id');
+        return view('admin.rattings.exceluser_edit', [
+            'user' => $user,
+            'wisataList' => $wisataList,
+            'rattings' => $rattings,
+        ]);
+    }
+
+    /**
+     * Proses simpan seluruh ratting user (pivot style).
+     */
+    public function updateExcelUser(Request $request, $userId): RedirectResponse
+    {
+        $user = User::findOrFail($userId);
+        $wisataList = Wisata::pluck('id');
+        $data = $request->validate([
+            'ratting' => ['array'],
+            'ratting.*' => ['nullable', 'integer', 'min:0', 'max:5'],
+            'ulasan' => ['array'],
+            'ulasan.*' => ['nullable', 'string'],
+        ]);
+        foreach ($wisataList as $wisataId) {
+            $nilai = $data['ratting'][$wisataId] ?? null;
+            $ulasan = $data['ulasan'][$wisataId] ?? null;
+            if ($nilai !== null && $nilai > 0) {
+                Ratting::updateOrCreate(
+                    ['user_id' => $userId, 'wisata_id' => $wisataId],
+                    ['ratting' => $nilai, 'ulasan' => $ulasan]
+                );
+            } else {
+                // Jika kosong/hapus, hapus ratting
+                Ratting::where('user_id', $userId)->where('wisata_id', $wisataId)->delete();
+            }
+        }
+        return redirect()->route('rattings.excelview')->with('success', 'Data ratting user berhasil disimpan.');
+    }
+
+    /**
+     * Hapus semua ratting user (pivot style).
+     */
+    public function deleteExcelUser($userId): RedirectResponse
+    {
+        Ratting::where('user_id', $userId)->delete();
+        return redirect()->route('rattings.excelview')->with('success', 'Semua data ratting user dihapus.');
     }
 }

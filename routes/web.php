@@ -11,6 +11,12 @@ use App\Http\Controllers\Wisatawan\RattingWisatawanController;
 use App\Http\Controllers\UsersImportController;
 use App\Http\Controllers\RattingsImportController;
 
+
+// Form input/edit seluruh ratting 1 user (pivot style)
+Route::get('admin/rattings/exceluser/{user}/edit', [RattingController::class, 'editExcelUser'])->name('rattings.exceluser.edit');
+Route::post('admin/rattings/exceluser/{user}/edit', [RattingController::class, 'updateExcelUser'])->name('rattings.exceluser.update');
+Route::delete('admin/rattings/exceluser/{user}/delete', [RattingController::class, 'deleteExcelUser'])->name('rattings.exceluser.delete');
+
 Route::get('/', function () {
     $role = session('user_role');
 
