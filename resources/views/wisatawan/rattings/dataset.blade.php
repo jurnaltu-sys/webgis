@@ -40,14 +40,19 @@
             </thead>
             <tbody>
                 @foreach($users as $user)
-                    <tr>
-                        <td>{{ $user->name }}<br><small class="text-muted">{{ $user->email }}</small></td>
-                        @foreach($wisataList as $wisata)
-                            <td>
-                                {{ $pivot[$user->id][$wisata->id] ?? '0' }}
-                            </td>
-                        @endforeach
-                    </tr>
+                            <tr @if(auth()->id() == $user->id) style="background-color:#28a745;color:white" @endif>
+                                <td>
+                                    {{ $user->name }}<br>
+                                    <small class="text-muted" @if(auth()->id() == $user->id) style="color:white !important" @endif>
+                                        {{ $user->email }}
+                                    </small>
+                                </td>
+                                @foreach($wisataList as $wisata)
+                                    <td>
+                                        {{ $pivot[$user->id][$wisata->id] ?? '0' }}
+                                    </td>
+                                @endforeach
+                            </tr>
                 @endforeach
             </tbody>
         </table>
