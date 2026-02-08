@@ -24,7 +24,7 @@
                 <table class="table table-striped mb-0">
                     <thead class="thead-dark">
                         <tr>
-                            <th style="width: 80px;">ID</th>
+                            <th style="width: 80px;">No</th>
                             <th>Nama</th>
                             <th>Email</th>
                             <th>Role</th>
@@ -34,7 +34,7 @@
                     <tbody>
                         @forelse ($users as $item)
                             <tr>
-                                <td>{{ $item->id }}</td>
+                                <td>{{ ($users->firstItem() ?? 0) + $loop->index }}</td>
                                 <td>{{ $item->name }}</td>
                                 <td>{{ $item->email }}</td>
                                 <td>{{ $item->role }}</td>

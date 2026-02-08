@@ -24,7 +24,7 @@
                 <table class="table table-striped mb-0">
                     <thead class="thead-dark">
                         <tr>
-                            <th style="width: 80px;">ID</th>
+                            <th style="width: 80px;">No</th>
                             <th>Nama</th>
                             <th>Slug</th>
                             <th>Kategori</th>
@@ -33,12 +33,13 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @php $no = ($wisata instanceof \Illuminate\Pagination\LengthAwarePaginator) ? ($wisata->firstItem() ?? 1) : 1; @endphp
                         @forelse ($wisata as $item)
                             <tr>
-                                <td>{{ $item->id }}</td>
+                                <td>{{ $no++ }}</td>
                                 <td>{{ $item->nama }}</td>
                                 <td>{{ $item->slug }}</td>
-                                <td>{{ $item->kategori_id }}</td>
+                                <td>{{ $item->kategori->nama ?? '-' }}</td>
                                 <td>{{ number_format((float) $item->rating_avg, 2) }} ({{ $item->jml_rating }})</td>
                                 <td>
                                     <a href="{{ route('wisata.show', $item) }}" class="btn btn-sm btn-info">Detail</a>
