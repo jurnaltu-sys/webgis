@@ -98,3 +98,5 @@ Route::post('admin/rattings/import', [RattingsImportController::class, 'import']
 // Ratting Format Dataset untuk wisatawan (lihat-only)
 Route::get('wisatawan/rattings/dataset', [App\Http\Controllers\Wisatawan\RattingDatasetWisatawanController::class, 'index'])
     ->name('wisatawan.rattings.dataset');
+Route::get('wisatawan/rattings/dataset/export', [App\Http\Controllers\Wisatawan\RattingDatasetWisatawanController::class, 'exportExcel'])
+    ->name('wisatawan.rattings.dataset.export');

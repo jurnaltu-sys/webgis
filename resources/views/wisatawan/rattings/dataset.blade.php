@@ -14,6 +14,12 @@
             </select>
             <button class="btn btn-primary" type="submit">Cari</button>
         </form>
+        <form method="GET" action="{{ route('wisatawan.rattings.dataset.export') }}" class="form-inline">
+            <input type="hidden" name="user_id" value="{{ request('user_id') }}">
+            <button class="btn btn-success" type="submit">
+                Export ke Excel
+            </button>
+        </form>
         @push('scripts')
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -32,7 +38,7 @@
         <table class="table table-bordered table-sm">
             <thead class="thead-light">
                 <tr>
-                    <th>User</th>
+                    <th>User                    php artisan route:clear</th>
                     @foreach($wisataList as $wisata)
                         <th>{{ $wisata->nama }}</th>
                     @endforeach
