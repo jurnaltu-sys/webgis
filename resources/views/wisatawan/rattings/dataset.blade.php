@@ -38,7 +38,7 @@
         <table class="table table-bordered table-sm">
             <thead class="thead-light">
                 <tr>
-                    <th>User                    php artisan route:clear</th>
+                    <th>User</th>
                     @foreach($wisataList as $wisata)
                         <th>{{ $wisata->nama }}</th>
                     @endforeach

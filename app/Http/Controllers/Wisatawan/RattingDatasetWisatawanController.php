@@ -25,17 +25,18 @@ class RattingDatasetWisatawanController extends Controller
     public function index(): View
     {
         $userId = request('user_id');
-        $usersQuery = User::where('role', 'wisatawan')->orderBy('name');
+        $usersQuery = User::where('role', 'wisatawan')->orderBy('id', 'asc');
         if ($userId) {
             $usersQuery->where('id', $userId);
         }
-        $users = $usersQuery->get();
+        $users = $usersQuery->get()->keyBy('id');
         $wisataList = Wisata::orderBy('nama')->get();
         $rattings = Ratting::get();
         $pivot = [];
         foreach ($rattings as $rat) {
             $pivot[$rat->user_id][$rat->wisata_id] = $rat->ratting;
         }
+
         return view('wisatawan.rattings.dataset', [
             'users' => $users,
             'wisataList' => $wisataList,

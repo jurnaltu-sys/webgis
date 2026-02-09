@@ -1,5 +1,8 @@
 <?php
 
+// Route proses rekomendasi wisatawan
+Route::get('/wisatawan/rekomendasi/proses', [App\Http\Controllers\RekomendasiController::class, 'proses'])->name('wisatawan.rekomendasi.proses');
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\KategoriController;
