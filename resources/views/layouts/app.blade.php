@@ -42,11 +42,11 @@
                     <li class="nav-item {{ request()->routeIs('wisatawan-wisata.*') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ route('wisatawan-wisata.index') }}">Wisata</a>
                     </li>
-                    <li class="nav-item {{ request()->routeIs('rekomendasi-wisatawan.*') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('rekomendasi-wisatawan.index') }}">Rekomendasi</a>
-                    </li>
                     <li class="nav-item {{ request()->routeIs('wisatawan.rattings.dataset') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ route('wisatawan.rattings.dataset') }}">Format Dataset</a>
+                    </li>
+                    <li class="nav-item {{ request()->routeIs('rekomendasi-wisatawan.*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ route('rekomendasi-wisatawan.index') }}">CF(User Based)</a>
                     </li>
                 @endif
             </ul>
