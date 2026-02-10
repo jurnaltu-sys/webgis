@@ -19,7 +19,7 @@
                     @else
                         <div class="list-group">
                             @foreach ($searchResults as $item)
-                                <div class="list-group-item d-flex align-items-center small">
+                                <label class="list-group-item d-flex align-items-center small mb-0" style="cursor:pointer;">
                                     <input type="checkbox"
                                         class="mr-2 js-wisata-checkbox"
                                         aria-label="Pilih {{ $item->nama }}"
@@ -28,8 +28,8 @@
                                         data-name="{{ $item->nama }}"
                                         data-photos='@json($item->foto->map(function ($foto) { return asset("storage/" . $foto->url); })->values())'
                                         checked>
-                                    <strong>{{ $item->nama }}</strong>
-                                </div>
+                                    <strong class="mb-0">{{ $item->nama }}</strong>
+                                </label>
                             @endforeach
                         </div>
                     @endif
@@ -49,6 +49,85 @@
                     <div id="wisata-map"></div>
                 </div>
             </div>
+            <!-- Rekomendasi untuk anda -->
+            <div class="card mb-4 border-success">
+                <div class="card-header py-2 bg-success text-white">
+                    <h6 class="mb-0 small">Rekomendasi by CF(User-Based)</h6>
+                </div>
+                <div class="card-body py-3">
+                    <div class="row">
+                        @forelse ($rekomendasiWisata as $wisata)
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100 border-success shadow-sm">
+                                    @if (!empty($wisata['foto']) && count($wisata['foto']) > 0)
+                                        <img src="{{ $wisata['foto'][0] }}" class="card-img-top" alt="Foto {{ $wisata['nama'] }}" style="height:150px;object-fit:cover;">
+                                    @else
+                                        <div class="bg-light d-flex align-items-center justify-content-center" style="height:150px;">
+                                            <span class="text-muted small">Tidak ada foto</span>
+                                        </div>
+                                    @endif
+                                    <div class="card-body py-2">
+                                        <h6 class="card-title mb-1 small">{{ $wisata['nama'] }}</h6>
+                                        <div class="mb-1 text-muted small">
+                                            Koordinat: {{ $wisata['latitude'] }}, {{ $wisata['longitude'] }}
+                                        </div>
+                                        <a href="{{ route('wisata.show', $wisata['id']) }}" class="btn btn-sm btn-outline-primary small">Lihat Detail</a>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="col-12">
+                                <div class="alert alert-info mb-0 small">Belum ada rekomendasi wisata untuk anda.</div>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4 border-warning">
+                <div class="card-header d-flex justify-content-between align-items-center bg-warning text-white">
+                    <span class="small">Ratting Saya</span>
+                </div>
+                <div class="card-body py-3">
+                    <div class="row">
+                        @forelse ($latestRattings as $item)
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100 border-warning shadow-sm">
+                                    @php
+                                        $coverFoto = null;
+                                        if ($item->wisata) {
+                                            $coverFoto = $item->wisata->foto()->where('is_cover', 1)->first();
+                                        }
+                                    @endphp
+                                    @if ($coverFoto && $coverFoto->url)
+                                        <img src="{{ asset('storage/' . $coverFoto->url) }}" class="card-img-top" alt="Foto {{ $item->wisata?->nama ?? '-' }}" style="height:150px;object-fit:cover;">
+                                    @else
+                                        <div class="bg-light d-flex align-items-center justify-content-center" style="height:150px;">
+                                            <span class="text-muted small">Tidak ada foto</span>
+                                        </div>
+                                    @endif
+                                    <div class="card-body py-2">
+                                        <h6 class="card-title mb-1 small text-primary">{{ $item->wisata?->nama ?? '-' }}</h6>
+                                        <div class="mb-1">
+                                            <span class="badge bg-primary text-white">Ratting: {{ $item->ratting }}</span>
+                                        </div>
+                                        <div class="mb-2 text-muted small">
+                                            {{ $item->ulasan ? \Illuminate\Support\Str::limit($item->ulasan, 60) : '-' }}
+                                        </div>
+                                        <a href="{{ route('rattings-wisatawan.show', $item) }}" class="btn btn-sm btn-outline-primary small">Detail</a>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="col-12">
+                                <div class="alert alert-info mb-0 small">Belum ada ratting.</div>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+            <br>
+
             <div class="modal fade" id="photoPreviewModal" tabindex="-1" role="dialog" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                     <div class="modal-content">
@@ -98,42 +177,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <span>Ratting Saya</span>
-                    <a href="{{ route('rattings-wisatawan.index') }}" class="btn btn-sm btn-outline-primary">Lihat Semua</a>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-striped mb-0">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th>Wisata</th>
-                                    <th style="width: 120px;">Ratting</th>
-                                    <th>Ulasan</th>
-                                    <th style="width: 120px;display:none">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse ($latestRattings as $item)
-                                    <tr>
-                                        <td>{{ $item->wisata?->nama ?? '-' }}</td>
-                                        <td>{{ $item->ratting }}</td>
-                                        <td>{{ $item->ulasan ? \Illuminate\Support\Str::limit($item->ulasan, 60) : '-' }}</td>
-                                        <td style="display:none">
-                                            <a href="{{ route('rattings-wisatawan.show', $item) }}" class="btn btn-sm btn-info">Detail</a>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="4" class="text-center">Belum ada ratting.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+            
         </div>
     </div>
 @endsection
@@ -191,6 +235,14 @@
                 popupAnchor: [1, -34],
                 shadowSize: [41, 41]
             });
+            var orangeIcon = new L.Icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            });
             function clearMarkers() {
                 markers.forEach(function (marker) {
                     map.removeLayer(marker);
@@ -200,6 +252,8 @@
             function updateMarkers() {
                 clearMarkers();
                 var points = [];
+                // Data ratting saya dari backend
+                var rattingSaya = window.rattingSaya || [];
                 // Tambahkan marker dari hasil pencarian (checkbox)
                 document.querySelectorAll('.js-wisata-checkbox:checked').forEach(function (checkbox) {
                     var lat = parseFloat(checkbox.getAttribute('data-lat'));
@@ -214,6 +268,10 @@
                     if (Number.isNaN(lat) || Number.isNaN(lng)) {
                         return;
                     }
+                    // Cek apakah titik ini ada di ratting saya
+                    var isRattingSaya = rattingSaya.some(function(item) {
+                        return parseFloat(item.latitude) === lat && parseFloat(item.longitude) === lng;
+                    });
                     var popupHtml = '<div><strong>' + name + '</strong>';
                     if (photos.length > 0) {
                         popupHtml += '<div class="mt-2 photo-scroll">';
@@ -225,7 +283,7 @@
                         popupHtml += '<div class="text-muted mt-1 small">Tidak ada foto.</div>';
                     }
                     popupHtml += '</div>';
-                    var marker = L.marker([lat, lng], { icon: redIcon }).addTo(map).bindPopup(popupHtml);
+                    var marker = L.marker([lat, lng], { icon: isRattingSaya ? orangeIcon : redIcon }).addTo(map).bindPopup(popupHtml);
                     markers.push(marker);
                     points.push([lat, lng]);
                 });
@@ -294,6 +352,15 @@
             });
             // Data rekomendasi dari backend
             window.rekomendasiWisata = @json($rekomendasiWisata ?? []);
+            // Data ratting saya dari backend
+            window.rattingSaya = @json(
+                ($latestRattings ?? collect([]))->map(function($item) {
+                    return [
+                        'latitude' => $item->wisata->latitude ?? null,
+                        'longitude' => $item->wisata->longitude ?? null
+                    ];
+                })->values()
+            );
             updateMarkers();
         });
     </script>
