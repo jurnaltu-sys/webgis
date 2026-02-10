@@ -107,6 +107,23 @@ class RekomendasiController extends Controller
             \App\Models\Rekomendasi::upsert($rekomendasiToInsert, ['id_user', 'id_wisata']);
         }
 
+        // Ambil list wisata untuk tabel
+        $wisataList = [];
+        foreach ($wisatas as $wid => $nama) {
+            $wisataList[] = [
+                'id' => $wid,
+                'nama' => $nama,
+            ];
+        }
+
+        // Buat pivot matriks rating user-wisata
+        $pivot = [];
+        foreach ($users as $uid => $userEmail) {
+            foreach ($wisataList as $w) {
+                $pivot[$uid][$w['id']] = $ratings[$uid][$w['id']] ?? 0;
+            }
+        }
+
         // Kirim ke view rekomendasi
         return view('wisatawan.rekomendasi', [
             'rekomendasi' => $rekomendasi,
@@ -118,12 +135,8 @@ class RekomendasiController extends Controller
             'userId' => $userId,
             'ratings' => $ratings,
             'similarityDetails' => $similarityDetails,
-        ]);
-
-        // Kirim ke view rekomendasi
-        return view('wisatawan.rekomendasi', [
-            'rekomendasi' => $rekomendasi,
-            'email' => $email,
+            'wisataList' => $wisataList,
+            'pivot' => $pivot,
         ]);
     }
 }

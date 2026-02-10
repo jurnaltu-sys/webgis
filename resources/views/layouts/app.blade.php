@@ -37,7 +37,7 @@
                         <a class="nav-link" href="{{ route('dashboard-wisatawan.index') }}">Dashboard</a>
                     </li>
                     <li class="nav-item {{ request()->routeIs('rattings-wisatawan.*') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('rattings-wisatawan.index') }}">Ratting Saya</a>
+                        <a class="nav-link" href="{{ route('rattings-wisatawan.index') }}">Favorit Saya</a>
                     </li>
                     <li class="nav-item {{ request()->routeIs('wisatawan-wisata.*') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ route('wisatawan-wisata.index') }}">Wisata</a>

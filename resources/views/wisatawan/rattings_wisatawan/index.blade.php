@@ -2,58 +2,97 @@
 
 @push('styles')
     <style>
-        /* Scrollable modal for Interest-based Onboarding */
-        #interestOnboardingModal .modal-dialog {
-            max-width: 900px;
-        }
-        #interestOnboardingModal .modal-content {
-            max-height: 80vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-        #interestOnboardingModal .modal-body {
-            overflow-y: auto;
-            max-height: 60vh;
-        }
-        .onboarding-wisata-card {
-            height: 100%;
-        }
-        .onboarding-wisata-card .card-img-top {
-            height: 160px;
-            object-fit: cover;
-        }
-        .onboarding-wisata-card.is-clickable {
-            cursor: pointer;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-        }
-        .onboarding-wisata-card.is-clickable:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-        }
-        .onboarding-wisata-card.is-rated {
-            border-color: #28a745;
-            box-shadow: 0 0 0 1px rgba(40, 167, 69, 0.35);
-        }
-        .onboarding-wisata-card.is-rated .card-body {
-            background: rgba(40, 167, 69, 0.08);
-        }
-        .onboarding-wisata-card.is-unrated {
-            border-color: #ced4da;
+        body {
             background: #f8f9fa;
         }
-            /* Overlay for onboarding modal when Ratting modal is shown */
-            #interestOnboardingModal .onboarding-overlay {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.5);
-                z-index: 1051;
-                pointer-events: none;
-            }
+        .tourism-header {
+                background: #185a9d;
+            color: #fff;
+            border-radius: 1rem;
+            box-shadow: 0 2px 16px rgba(67,206,162,0.1);
+            padding: 2rem 1.5rem 1rem 1.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .tourism-header .header-bg {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 180px;
+            opacity: 0.15;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .tourism-header > * {
+            position: relative;
+            z-index: 1;
+        }
+        .tourism-header .fa-umbrella-beach {
+            font-size: 2.5rem;
+            margin-right: 1rem;
+        }
+        .table thead {
+                background: #185a9d;
+            color: #fff;
+        }
+        .onboarding-wisata-card {
+            border-radius: 1rem;
+            box-shadow: 0 2px 8px rgba(67,206,162,0.08);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .onboarding-wisata-card .card-img-top {
+            height: 140px;
+            object-fit: cover;
+            border-top-left-radius: 1rem;
+            border-top-right-radius: 1rem;
+        }
+        .onboarding-wisata-card.is-clickable:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 8px 24px rgba(24,90,157,0.12);
+        }
+        .onboarding-wisata-card.is-rated {
+                border: 2px solid #185a9d;
+            background: #e9fbe5;
+        }
+        .onboarding-wisata-card.is-unrated {
+            border: 2px dashed #b2dfdb;
+            background: #f8f9fa;
+        }
+        .modal-header {
+                background: #185a9d;
+            color: #fff;
+            border-top-left-radius: 0.5rem;
+            border-top-right-radius: 0.5rem;
+        }
+        .modal-footer {
+            background: #f8f9fa;
+            border-bottom-left-radius: 0.5rem;
+            border-bottom-right-radius: 0.5rem;
+        }
+        .btn-primary, .btn-success, .btn-warning {
+            border-radius: 2rem;
+        }
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: #f1f8e9;
+        }
+        .table-striped tbody tr:nth-of-type(even) {
+            background-color: #e3f2fd;
+        }
+        .badge-tourism {
+                background: #185a9d;
+            color: #fff;
+            border-radius: 1rem;
+            font-size: 0.9rem;
+            padding: 0.4em 1em;
+        }
+        /* Scrollable modal body for onboarding */
+        #interestOnboardingModal .modal-body {
+            max-height: 60vh;
+            overflow-y: auto;
+        }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 @endpush
 @push('scripts')
     <script>
@@ -139,6 +178,7 @@
                 return text.substring(0, maxLength) + '...';
             }
 
+
             function appendRattingRow(ratting) {
                 if (!ratting || !ratting.id) {
                     return;
@@ -160,12 +200,11 @@
                     + '<td>' + ratting.ratting + '</td>'
                     + '<td>' + ulasan + '</td>'
                     + '<td>'
-                    + '<a style="display:none" href="' + ratting.show_url + '" class="btn btn-sm btn-info">Detail</a> '
-                    + '<a  href="' + ratting.edit_url + '" class="btn btn-sm btn-warning">Edit</a> '
-                    + '<form  action="' + ratting.destroy_url + '" method="POST" class="d-inline js-delete-rating" onsubmit="return confirm(\'Hapus data ini?\')">'
-                    + '<input type="hidden" name="_token" value="' + csrfToken + '">'
+                    + '<a href="' + ratting.edit_url + '" class="btn btn-sm btn-warning mr-1"><i class="fas fa-edit"></i> Edit</a>'
+                    + '<form action="' + ratting.destroy_url + '" method="POST" class="d-inline js-delete-rating" onsubmit="return confirm(\'Hapus data ini?\')">'
+                    + '<input type="hidden" name="_token" value="' + csrfToken + '">' 
                     + '<input type="hidden" name="_method" value="DELETE">'
-                    + '<button style="display:none" type="submit" class="btn btn-sm btn-danger">Hapus</button>'
+                    + '<button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash-alt"></i> Hapus</button>'
                     + '</form>'
                     + '</td>'
                     + '</tr>';
@@ -329,41 +368,44 @@
 @endpush
 
 @section('content')
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="h4 mb-0">Ratting Saya</h1>
+
+    <div class="tourism-header mb-4 d-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center">
-            <button type="button" class="btn btn-primary mr-2" data-toggle="modal" data-target="#interestOnboardingModal">
-                Tambah
-            </button>
-            <!--
-            <a href="{{ route('rattings-wisatawan.create') }}" class="btn btn-primary">Tambah</a>
-            -->
+            <i class="fas fa-umbrella-beach mr-3"></i>
+            <div>
+                <h1 class="h4 mb-1 font-weight-bold">Favorit &amp; Ratting Wisata Saya</h1>
+                <div class="mb-0 small">Kelola ulasan dan ratting destinasi favoritmu untuk pengalaman wisata terbaik!</div>
+            </div>
         </div>
+        <button type="button" class="btn btn-success btn-lg shadow-sm" data-toggle="modal" data-target="#interestOnboardingModal">
+            <i class="fas fa-plus mr-1"></i> Tambah Favorit
+        </button>
+        <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80" class="header-bg d-none d-md-block" alt="Tourism">
     </div>
 
-    <form method="GET" action="{{ route('rattings-wisatawan.index') }}" class="mb-3">
-        <div class="input-group">
-            <input type="text" name="q" value="{{ $query ?? '' }}" class="form-control" placeholder="Cari...">
+    <form method="GET" action="{{ route('rattings-wisatawan.index') }}" class="mb-4">
+        <div class="input-group input-group-lg shadow-sm">
+            <input type="text" name="q" value="{{ $query ?? '' }}" class="form-control" placeholder="Cari destinasi favorit...">
             <div class="input-group-append">
-                <button class="btn btn-outline-secondary" type="submit">Cari</button>
+                <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i> Cari</button>
                 @if (!empty($query))
-                    <a href="{{ route('rattings-wisatawan.index') }}" class="btn btn-outline-danger">Reset</a>
+                    <a href="{{ route('rattings-wisatawan.index') }}" class="btn btn-danger"><i class="fas fa-times"></i> Reset</a>
                 @endif
             </div>
         </div>
     </form>
 
-    <div class="card">
+    <div class="card border-0 shadow-sm mb-4 bg-light">
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-striped mb-0" id="rattingsTable">
-                    <thead class="thead-dark">
+                    <thead>
                         <tr>
-                            <th style="width: 80px;">No</th>
-                            <th>Wisata</th>
-                            <th style="width: 120px;">Ratting</th>
-                            <th>Ulasan</th>
-                            <th style="width: 200px;">Aksi</th>
+                            <th style="width: 60px;">No</th>
+                            <th><i class="fas fa-map-marker-alt"></i> Wisata</th>
+                            <th style="width: 120px;"><i class="fas fa-star text-warning"></i> Ratting</th>
+                            <th><i class="fas fa-comment-dots"></i> Ulasan</th>
+                            <th style="width: 180px;"><i class="fas fa-cogs"></i> Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -374,15 +416,12 @@
                                 <td>{{ $item->ratting }}</td>
                                 <td>{{ $item->ulasan ? \Illuminate\Support\Str::limit($item->ulasan, 60) : '-' }}</td>
                                 <td>
-                                    <a style="display:none" href="{{ route('rattings-wisatawan.show', $item) }}" class="btn btn-sm btn-info">Detail</a>
-
-                                    <a href="{{ route('rattings-wisatawan.edit', $item) }}" class="btn btn-sm btn-warning">Edit</a>
+                                    <a href="{{ route('rattings-wisatawan.edit', $item) }}" class="btn btn-sm btn-warning mr-1"><i class="fas fa-edit"></i> Edit</a>
                                     <form action="{{ route('rattings-wisatawan.destroy', $item) }}" method="POST" class="d-inline js-delete-rating" onsubmit="return confirm('Hapus data ini?')">
                                         @csrf
                                         @method('DELETE')
-                                        <button style="display:none" type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                        <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash-alt"></i> Hapus</button>
                                     </form>
-                             
                                 </td>
                             </tr>
                         @empty
@@ -405,13 +444,13 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="interestOnboardingModalLabel">Interest-based Onboarding</h5>
+                    <h5 class="modal-title" id="interestOnboardingModalLabel"><i class="fas fa-heart text-danger mr-2"></i>Pilih Destinasi Favoritmu</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p class="mb-3">Silakan pilih 5  untuk mendapatkan rekomendasi wisata yang lebih relevan.</p>
+                    <p class="mb-3">Pilih minimal 5 destinasi favorit untuk mendapatkan rekomendasi wisata yang lebih relevan dan personal.</p>
                     <div class="row">
                         @forelse ($wisata as $item)
                             @php
@@ -423,7 +462,7 @@
                                 <div class="card h-100 onboarding-wisata-card is-clickable {{ $isRated ? 'is-rated' : 'is-unrated' }} js-open-quick-rating" data-wisata-id="{{ $item->id }}" data-wisata-nama="{{ $item->nama }}">
                                     <img src="{{ $imageUrl }}" class="card-img-top" alt="{{ $item->nama }}">
                                     <div class="card-body py-2">
-                                        <div class="font-weight-bold">{{ $item->nama }}</div>
+                                        <div class="font-weight-bold mb-1"><i class="fas fa-map-marker-alt text-danger mr-1"></i>{{ $item->nama }}</div>
                                         @if($isRated)
                                             @php
                                                 $ratting = \App\Models\Ratting::where('user_id', (int) (session('user.id') ?? session('user_id', 0)))->where('wisata_id', $item->id)->first();
@@ -432,7 +471,7 @@
                                                 <form action="{{ route('rattings-wisatawan.destroy', $ratting->id) }}" method="POST" class="mt-2 js-delete-rating-onboarding" data-wisata-id="{{ $item->id }}" onsubmit="return confirm('Hapus data ini?')">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                                    <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash-alt"></i> Hapus</button>
                                                 </form>
                                             @endif
                                         @endif
@@ -457,7 +496,7 @@
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="quickRatingModalLabel">Ratting</h5>
+                    <h5 class="modal-title" id="quickRatingModalLabel"><i class="fas fa-star text-warning mr-2"></i>Tambah/Ubah Ratting</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -469,7 +508,7 @@
 
                         <div class="form-group">
                             <label for="quickRatingWisataName">Wisata</label>
-                            <input type="text" id="quickRatingWisataName" class="form-control" value="" readonly>
+                            <input type="text" id="quickRatingWisataName" class="form-control bg-light" value="" readonly>
                         </div>
 
                         <div class="form-group">
@@ -483,13 +522,13 @@
 
                         <div class="form-group mb-0">
                             <label for="quickRatingUlasan">Ulasan (opsional)</label>
-                            <textarea name="ulasan" id="quickRatingUlasan" rows="3" class="form-control"></textarea>
+                            <textarea name="ulasan" id="quickRatingUlasan" rows="3" class="form-control bg-light"></textarea>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary" form="quickRatingForm">Simpan</button>
+                    <button type="submit" class="btn btn-success" form="quickRatingForm"><i class="fas fa-save"></i> Simpan</button>
                 </div>
             </div>
         </div>

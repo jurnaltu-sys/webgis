@@ -1,19 +1,20 @@
 @extends('layouts.app')
 @section('content')
+    
     <div class="row">
         <div class="col-md-3 mb-4">
-            <div class="card border-0 shadow-sm">
+            <div class="card border-0 shadow-sm bg-light">
                 <div class="card-body p-3">
-                    <h6 class="text-muted">Pencarian</h6>
+                    <h6 class="text-primary"><i class="fas fa-search mr-2"></i>Pencarian Wisata</h6>
                     <form method="GET" action="{{ route('dashboard-wisatawan.index') }}">
                         <div class="form-group">
                             <label for="search" class="sr-only">Cari</label>
                             <input type="text" name="q" id="search" class="form-control" placeholder="Cari nama wisata..." value="{{ $searchQuery ?? '' }}">
                         </div>
-                        <button type="submit" class="btn btn-primary btn-block">Cari</button>
+                        <button type="submit" class="btn btn-success btn-block"><i class="fas fa-search"></i> Cari</button>
                     </form>
                     <hr>
-                    <h6 class="text-muted">Hasil Pencarian</h6>
+                    <h6 class="text-info mt-3"><i class="fas fa-map-marker-alt mr-2"></i>Hasil Pencarian</h6>
                     @if ($searchResults->isEmpty())
                         <p class="text-muted mb-0">Tidak ada hasil.</p>
                     @else
@@ -28,7 +29,7 @@
                                         data-name="{{ $item->nama }}"
                                         data-photos='@json($item->foto->map(function ($foto) { return asset("storage/" . $foto->url); })->values())'
                                         checked>
-                                    <strong class="mb-0">{{ $item->nama }}</strong>
+                                    <i class="fas fa-map-pin text-info mr-2"></i><strong class="mb-0">{{ $item->nama }}</strong>
                                 </label>
                             @endforeach
                         </div>
@@ -39,12 +40,12 @@
         <div class="col-md-9">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h1 class="h4 mb-1">Dashboard Wisatawan</h1>
-                    <p class="text-muted mb-0">Selamat datang, {{ session('user_email', '-') }}</p>
+                    <h1 class="h4 mb-1 text-success"><i class="fas fa-globe-asia mr-2"></i>Dashboard Wisatawan</h1>
+                    <p class="text-muted mb-0">Selamat datang, <span class="font-weight-bold text-primary">{{ session('user_email', '-') }}</span></p>
                 </div>
-                <a href="{{ route('rattings-wisatawan.create') }}" class="btn btn-primary">Tambah Ratting</a>
+                <a href="{{ route('rattings-wisatawan.create') }}" class="btn btn-warning text-white"><i class="fas fa-star mr-1"></i>Tambah Ratting</a>
             </div>
-            <div class="card border-0 shadow-sm mb-4">
+            <div class="card border-0 shadow-sm mb-4 bg-light">
                 <div class="card-body p-0">
                     <div id="wisata-map"></div>
                 </div>
@@ -52,7 +53,7 @@
             <!-- Rekomendasi untuk anda -->
             <div class="card mb-4 border-success">
                 <div class="card-header py-2 bg-success text-white">
-                    <h6 class="mb-0 small">Rekomendasi by CF(User-Based)</h6>
+                    <h6 class="mb-0 small"><i class="fas fa-thumbs-up mr-2"></i>Rekomendasi by CF(User-Based)</h6>
                 </div>
                 <div class="card-body py-3">
                     <div class="row">
@@ -86,7 +87,7 @@
 
             <div class="card mb-4 border-warning">
                 <div class="card-header d-flex justify-content-between align-items-center bg-warning text-white">
-                    <span class="small">Ratting Saya</span>
+                    <span class="small"><i class="fas fa-star mr-2"></i>Favorit Saya</span>
                 </div>
                 <div class="card-body py-3">
                     <div class="row">
@@ -107,9 +108,9 @@
                                         </div>
                                     @endif
                                     <div class="card-body py-2">
-                                        <h6 class="card-title mb-1 small text-primary">{{ $item->wisata?->nama ?? '-' }}</h6>
+                                        <h6 class="card-title mb-1 small text-primary"><i class="fas fa-map-marker-alt mr-1"></i>{{ $item->wisata?->nama ?? '-' }}</h6>
                                         <div class="mb-1">
-                                            <span class="badge bg-primary text-white">Ratting: {{ $item->ratting }}</span>
+                                            <span class="badge bg-warning text-white"><i class="fas fa-star mr-1"></i>Ratting: {{ $item->ratting }}</span>
                                         </div>
                                         <div class="mb-2 text-muted small">
                                             {{ $item->ulasan ? \Illuminate\Support\Str::limit($item->ulasan, 60) : '-' }}
@@ -137,35 +138,39 @@
                     </div>
                 </div>
             </div>
-            <div class="row">
+            <div class="row mt-4">
                 <div class="col-md-3 mb-3">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-body">
-                            <div class="text-muted">Total Wisata</div>
+                    <div class="card border-0 shadow-sm bg-info text-white">
+                        <div class="card-body text-center">
+                            <div class="text-white"><i class="fas fa-map-signs fa-2x mb-2"></i></div>
+                            <div class="h6">Total Wisata</div>
                             <div class="h4 mb-0">{{ number_format($totalWisata ?? 0) }}</div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3 mb-3">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-body">
-                            <div class="text-muted">Total Kategori</div>
+                    <div class="card border-0 shadow-sm bg-success text-white">
+                        <div class="card-body text-center">
+                            <div class="text-white"><i class="fas fa-tags fa-2x mb-2"></i></div>
+                            <div class="h6">Total Kategori</div>
                             <div class="h4 mb-0">{{ number_format($totalKategori ?? 0) }}</div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3 mb-3">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-body">
-                            <div class="text-muted">Ratting Saya</div>
+                    <div class="card border-0 shadow-sm bg-warning text-white">
+                        <div class="card-body text-center">
+                            <div class="text-white"><i class="fas fa-star fa-2x mb-2"></i></div>
+                            <div class="h6">Favorit Saya</div>
                             <div class="h4 mb-0">{{ number_format($totalRattingSaya ?? 0) }}</div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3 mb-3">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-body">
-                            <div class="text-muted">Rata-rata Ratting</div>
+                    <div class="card border-0 shadow-sm bg-secondary text-white">
+                        <div class="card-body text-center">
+                            <div class="text-white"><i class="fas fa-chart-line fa-2x mb-2"></i></div>
+                            <div class="h6">Rata-rata Ratting</div>
                             <div class="h4 mb-0">
                                 @if (!is_null($avgRattingSaya))
                                     {{ number_format($avgRattingSaya, 1) }}/5
@@ -183,6 +188,7 @@
 @endsection
 @push('styles')
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <style>
         #wisata-map {
             height: 360px;
@@ -252,7 +258,7 @@
             function updateMarkers() {
                 clearMarkers();
                 var points = [];
-                // Data ratting saya dari backend
+                // Data Favorit Saya dari backend
                 var rattingSaya = window.rattingSaya || [];
                 // Tambahkan marker dari hasil pencarian (checkbox)
                 document.querySelectorAll('.js-wisata-checkbox:checked').forEach(function (checkbox) {
@@ -268,7 +274,7 @@
                     if (Number.isNaN(lat) || Number.isNaN(lng)) {
                         return;
                     }
-                    // Cek apakah titik ini ada di ratting saya
+                    // Cek apakah titik ini ada di Favorit Saya
                     var isRattingSaya = rattingSaya.some(function(item) {
                         return parseFloat(item.latitude) === lat && parseFloat(item.longitude) === lng;
                     });
@@ -352,7 +358,7 @@
             });
             // Data rekomendasi dari backend
             window.rekomendasiWisata = @json($rekomendasiWisata ?? []);
-            // Data ratting saya dari backend
+            // Data Favorit Saya dari backend
             window.rattingSaya = @json(
                 ($latestRattings ?? collect([]))->map(function($item) {
                     return [
