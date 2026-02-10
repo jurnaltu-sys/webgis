@@ -20,7 +20,7 @@ class WisatawanWisataController extends Controller
 
     public function index()
     {
-        $wisata = Wisata::all();
+        $wisata = Wisata::with('foto')->get();
         return view('wisatawan.wisata.index', compact('wisata'));
     }
 

@@ -15,7 +15,7 @@
         <div class="card-body">
             <div class="form-row">
                 <div class="col-md-6">
-                    <div class="form-group">
+                    <div style="display:none" class="form-group">
                         <label>ID</label>
                         <input type="text" class="form-control" value="{{ $wisata->id }}" readonly>
                     </div>

@@ -50,8 +50,13 @@ class Wisata extends Model
     public function fotoUtama()
     {
         $foto = $this->foto()->first();
-        if ($foto && $foto->path) {
-            return asset('storage/' . $foto->path);
+        if ($foto && $foto->url) {
+            // Jika url sudah mengandung 'http' atau 'https', gunakan langsung
+            if (preg_match('/^https?:\/\//', $foto->url)) {
+                return $foto->url;
+            }
+            // Jika url adalah path relatif, gunakan asset('storage/...')
+            return asset('storage/' . $foto->url);
         }
         return asset('images/default-wisata.jpg');
     }
