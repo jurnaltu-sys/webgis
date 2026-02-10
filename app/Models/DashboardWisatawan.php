@@ -27,6 +27,23 @@ class DashboardWisatawan
             ->take(20)
             ->get();
 
+        // Ambil rekomendasi beserta data wisata terkait
+        $rekomendasiWisata = \App\Models\Rekomendasi::query()
+            ->with(['wisata.foto'])
+            ->get()
+            ->map(function ($item) {
+                $wisata = $item->wisata;
+                return [
+                    'id' => $wisata->id ?? null,
+                    'nama' => $wisata->nama ?? '',
+                    'latitude' => $wisata->latitude ?? null,
+                    'longitude' => $wisata->longitude ?? null,
+                    'foto' => $wisata->foto->map(function ($foto) { return asset('storage/' . $foto->url); })->values(),
+                ];
+            })->filter(function ($item) {
+                return $item['latitude'] && $item['longitude'];
+            })->values();
+
         return [
             'totalWisata' => $totalWisata,
             'totalKategori' => $totalKategori,
@@ -35,6 +52,7 @@ class DashboardWisatawan
             'latestRattings' => $latestRattings,
             'searchResults' => $searchResults,
             'searchQuery' => $query,
+            'rekomendasiWisata' => $rekomendasiWisata,
         ];
     }
 }

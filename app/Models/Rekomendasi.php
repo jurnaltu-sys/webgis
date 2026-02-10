@@ -11,4 +11,9 @@ class Rekomendasi extends Model
         'id_user',
         'id_wisata',
     ];
+
+    public function wisata()
+    {
+        return $this->belongsTo(Wisata::class, 'id_wisata');
+    }
 }

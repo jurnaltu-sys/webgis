@@ -192,6 +192,14 @@
                 popupAnchor: [1, -34],
                 shadowSize: [41, 41]
             });
+            var greenIcon = new L.Icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            });
 
             function clearMarkers() {
                 markers.forEach(function (marker) {
@@ -200,10 +208,13 @@
                 markers = [];
             }
 
+
             function updateMarkers() {
                 clearMarkers();
 
                 var points = [];
+
+                // Tambahkan marker dari hasil pencarian (checkbox)
                 document.querySelectorAll('.js-wisata-checkbox:checked').forEach(function (checkbox) {
                     var lat = parseFloat(checkbox.getAttribute('data-lat'));
                     var lng = parseFloat(checkbox.getAttribute('data-lng'));
@@ -235,6 +246,36 @@
                     markers.push(marker);
                     points.push([lat, lng]);
                 });
+
+                // Tambahkan marker dari rekomendasi (pakai icon hijau)
+                if (window.rekomendasiWisata && Array.isArray(window.rekomendasiWisata)) {
+                    window.rekomendasiWisata.forEach(function(item) {
+                        var lat = parseFloat(item.latitude);
+                        var lng = parseFloat(item.longitude);
+                        var name = item.nama || '';
+                        var photos = item.foto || [];
+
+                        if (Number.isNaN(lat) || Number.isNaN(lng)) {
+                            return;
+                        }
+
+                        var popupHtml = '<div><strong>' + name + '</strong>';
+                        if (photos.length > 0) {
+                            popupHtml += '<div class="mt-2 photo-scroll">';
+                            photos.forEach(function (url) {
+                                popupHtml += '<img src="' + url + '" alt="' + name + '" data-photo-url="' + url + '">';
+                            });
+                            popupHtml += '</div>';
+                        } else {
+                            popupHtml += '<div class="text-muted mt-1 small">Tidak ada foto.</div>';
+                        }
+                        popupHtml += '</div>';
+
+                        var marker = L.marker([lat, lng], { icon: greenIcon }).addTo(map).bindPopup(popupHtml);
+                        markers.push(marker);
+                        points.push([lat, lng]);
+                    });
+                }
 
                 if (points.length > 0) {
                     var bounds = L.latLngBounds(points);
@@ -279,6 +320,8 @@
                 });
             });
 
+            // Data rekomendasi dari backend
+            window.rekomendasiWisata = @json($rekomendasiWisata ?? []);
             updateMarkers();
         });
     </script>
