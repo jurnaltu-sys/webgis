@@ -6,7 +6,13 @@
 <div class="container mt-4">
     <h1 class="mb-3">Rekomendasi Wisata</h1>
     <p class="lead">Dapatkan rekomendasi wisata berdasarkan kemiripan rating Anda dengan pengguna lain menggunakan metode Collaborative Filtering.</p>
-    <a href="{{ route('wisatawan.rekomendasi.proses') }}" class="btn btn-success mb-4">Proses Rekomendasi</a>
+    <a href="{{ route('wisatawan.rekomendasi.proses') }}" class="btn btn-success mb-4" id="btn-rekomendasi">Dapatkan Rekomendasi</a>
+    <div id="loading-rekomendasi" class="text-center mb-3" style="display:none">
+        <div class="spinner-border text-success" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <div>Menjalankan Algoritma Collaborative Filtering (User-Based), mohon tunggu...</div>
+    </div>
 
     <div class="card mb-4">
         <div class="card-header bg-primary text-white">
@@ -102,5 +108,15 @@
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('btn-rekomendasi').addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('loading-rekomendasi').style.display = 'block';
+        var url = this.getAttribute('href');
+        setTimeout(function() {
+            window.location.href = url;
+        }, 2000);
+    });
+</script>
 @endpush
 @endsection

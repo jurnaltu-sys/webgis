@@ -12,6 +12,11 @@ class RekomendasiController extends Controller
         // Ambil user yang sedang login
         $user = Auth::user();
         $email = $user ? $user->email : null;
+        $userId = $user ? $user->id : null;
+        // Hapus semua data rekomendasi user ini sebelum menyimpan yang baru
+        if ($userId) {
+            \App\Models\Rekomendasi::where('id_user', $userId)->delete();
+        }
 
         // Ambil dataset ratting dari database
         $dataset = \App\Models\Ratting::with(['user', 'wisata'])->get();
@@ -87,10 +92,19 @@ class RekomendasiController extends Controller
         $userRated = array_keys($ratings[$userId] ?? []);
         $topRated = $ratings[$topUser] ?? [];
         $rekomendasi = [];
+        $rekomendasiToInsert = [];
         foreach ($topRated as $wid => $nilai) {
             if (!in_array($wid, $userRated) && $nilai >= 4) {
                 $rekomendasi[] = $wisatas[$wid];
+                $rekomendasiToInsert[] = [
+                    'id_user' => $userId,
+                    'id_wisata' => $wid,
+                ];
             }
+        }
+        // Simpan ke tabel rekomendasi (hindari duplikat)
+        if (!empty($rekomendasiToInsert)) {
+            \App\Models\Rekomendasi::upsert($rekomendasiToInsert, ['id_user', 'id_wisata']);
         }
 
         // Kirim ke view rekomendasi
