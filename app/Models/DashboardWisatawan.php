@@ -36,6 +36,7 @@ class DashboardWisatawan
                 return [
                     'id' => $wisata->id ?? null,
                     'nama' => $wisata->nama ?? '',
+                    'deskripsi' => $wisata->deskripsi ?? '',
                     'latitude' => $wisata->latitude ?? null,
                     'longitude' => $wisata->longitude ?? null,
                     'foto' => $wisata->foto->map(function ($foto) { return asset('storage/' . $foto->url); })->values(),

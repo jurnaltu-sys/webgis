@@ -46,11 +46,17 @@
         <div class="col-md-6 col-lg-5">
             <div class="card tourism-login-card border-0">
                 <div class="card-header tourism-header">
-                    <span class="tourism-icon">🌴</span> Register Wisata Nusantara
+                     Register
                 </div>
                 <div class="card-body">
                     <form method="POST" action="{{ route('register.submit') }}">
                         @csrf
+                        <div class="text-center mb-4">
+                            <div style="font-weight:bold; font-size:1.1rem; color:#1976d2; line-height:1.4;">
+                                Smarttour PANIAI<br>
+                                Rancang bangun webgis rekomendasi wisata alam dan budaya menggunakan metode Collaborative Filtering
+                            </div>
+                        </div>
                         <div class="form-group mb-3">
                             <label for="name">Nama</label>
                             <input type="text" name="name" id="name" value="{{ old('name') }}" class="form-control @error('name') is-invalid @enderror" required autofocus placeholder="Masukkan nama Anda">

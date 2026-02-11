@@ -1,3 +1,4 @@
+@php use Illuminate\Support\Str; @endphp
 @extends('layouts.app')
 @section('content')
     
@@ -70,9 +71,9 @@
                                     <div class="card-body py-2">
                                         <h6 class="card-title mb-1 small">{{ $wisata['nama'] }}</h6>
                                         <div class="mb-1 text-muted small">
-                                            Koordinat: {{ $wisata['latitude'] }}, {{ $wisata['longitude'] }}
+                                            {{ $wisata['deskripsi'] ? Str::limit($wisata['deskripsi'], 80) : '-' }}
                                         </div>
-                                        <a href="{{ route('wisata.show', $wisata['id']) }}" class="btn btn-sm btn-outline-primary small">Lihat Detail</a>
+                                        <a href="{{ url('wisatawan-wisata/' . $wisata['id']) }}" class="btn btn-sm btn-outline-primary small">Detail</a>
                                     </div>
                                 </div>
                             </div>
@@ -109,13 +110,16 @@
                                     @endif
                                     <div class="card-body py-2">
                                         <h6 class="card-title mb-1 small text-primary"><i class="fas fa-map-marker-alt mr-1"></i>{{ $item->wisata?->nama ?? '-' }}</h6>
+                                        <div class="mb-1 text-muted small">
+                                            {{ $item->wisata?->deskripsi ? Str::limit($item->wisata->deskripsi, 80) : '-' }}
+                                        </div>
                                         <div class="mb-1">
                                             <span class="badge bg-warning text-white"><i class="fas fa-star mr-1"></i>Ratting: {{ $item->ratting }}</span>
                                         </div>
                                         <div class="mb-2 text-muted small">
                                             {{ $item->ulasan ? \Illuminate\Support\Str::limit($item->ulasan, 60) : '-' }}
                                         </div>
-                                        <a href="{{ route('rattings-wisatawan.show', $item) }}" class="btn btn-sm btn-outline-primary small">Detail</a>
+                                        <a href="{{ url('wisatawan-wisata/' . ($item->wisata?->id ?? 0)) }}" class="btn btn-sm btn-outline-primary small">Detail</a>
                                     </div>
                                 </div>
                             </div>

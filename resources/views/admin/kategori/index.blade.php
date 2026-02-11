@@ -24,7 +24,7 @@
                 <table class="table table-striped mb-0">
                     <thead class="thead-dark">
                         <tr>
-                            <th style="width: 80px;">ID</th>
+                            <th style="width: 80px;">No</th>
                             <th>Nama</th>
                             <th style="width: 200px;">Aksi</th>
                         </tr>
@@ -32,7 +32,7 @@
                     <tbody>
                         @forelse ($kategori as $item)
                             <tr>
-                                <td>{{ $item->id }}</td>
+                                <td>{{ $loop->iteration }}</td>
                                 <td>{{ $item->nama }}</td>
                                 <td>
                                     <a href="{{ route('kategori.show', $item) }}" class="btn btn-sm btn-info">Detail</a>

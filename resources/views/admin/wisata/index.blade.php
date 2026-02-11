@@ -31,7 +31,7 @@
                             <th>Nama</th>
                             <th>Slug</th>
                             <th>Kategori</th>
-                            <th>Rating</th>
+                            <!-- <th>Rating</th> -->
                             <th style="width: 200px;">Aksi</th>
                         </tr>
                     </thead>
@@ -43,7 +43,7 @@
                                 <td>{{ $item->nama }}</td>
                                 <td>{{ $item->slug }}</td>
                                 <td>{{ $item->kategori->nama ?? '-' }}</td>
-                                <td>{{ number_format((float) $item->rating_avg, 2) }} ({{ $item->jml_rating }})</td>
+                                <!-- <td>{{ number_format((float) $item->rating_avg, 2) }} ({{ $item->jml_rating }})</td> -->
                                 <td>
                                     <a href="{{ route('wisata.show', $item) }}" class="btn btn-sm btn-info">Detail</a>
                                     <a href="{{ route('wisata.edit', $item) }}" class="btn btn-sm btn-warning">Edit</a>
@@ -56,7 +56,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center">Belum ada data.</td>
+                                <td colspan="5" class="text-center">Belum ada data.</td>
                             </tr>
                         @endforelse
                     </tbody>
