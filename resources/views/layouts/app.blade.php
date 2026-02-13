@@ -20,6 +20,9 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 @if ($userRole === 'admin')
+                    <li class="nav-item {{ request()->routeIs('dashboard-admin.*') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ route('dashboard-admin.index') }}">Dashboard</a>
+                    </li>
                     <li class="nav-item {{ request()->routeIs('wisata.*') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ route('wisata.index') }}">Wisata</a>
                     </li>

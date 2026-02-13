@@ -143,7 +143,7 @@
                 </div>
             </div>
             <div class="row mt-4">
-                <div class="col-md-3 mb-3">
+                <div class="col-md-4 mb-3">
                     <div class="card border-0 shadow-sm bg-info text-white">
                         <div class="card-body text-center">
                             <div class="text-white"><i class="fas fa-map-signs fa-2x mb-2"></i></div>
@@ -152,7 +152,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3 mb-3">
+                <div class="col-md-4 mb-3">
                     <div class="card border-0 shadow-sm bg-success text-white">
                         <div class="card-body text-center">
                             <div class="text-white"><i class="fas fa-tags fa-2x mb-2"></i></div>
@@ -161,27 +161,12 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3 mb-3">
+                <div class="col-md-4 mb-3">
                     <div class="card border-0 shadow-sm bg-warning text-white">
                         <div class="card-body text-center">
                             <div class="text-white"><i class="fas fa-star fa-2x mb-2"></i></div>
                             <div class="h6">Favorit Saya</div>
                             <div class="h4 mb-0">{{ number_format($totalRattingSaya ?? 0) }}</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <div class="card border-0 shadow-sm bg-secondary text-white">
-                        <div class="card-body text-center">
-                            <div class="text-white"><i class="fas fa-chart-line fa-2x mb-2"></i></div>
-                            <div class="h6">Rata-rata Ratting</div>
-                            <div class="h4 mb-0">
-                                @if (!is_null($avgRattingSaya))
-                                    {{ number_format($avgRattingSaya, 1) }}/5
-                                @else
-                                    -
-                                @endif
-                            </div>
                         </div>
                     </div>
                 </div>

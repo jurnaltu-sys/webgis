@@ -1,9 +1,8 @@
+
 <?php
 
-// Route proses rekomendasi wisatawan
-Route::get('/wisatawan/rekomendasi/proses', [App\Http\Controllers\RekomendasiController::class, 'proses'])->name('wisatawan.rekomendasi.proses');
-
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\DashboardAdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\KategoriController;
 use App\Http\Controllers\Admin\RattingController;
@@ -14,6 +13,13 @@ use App\Http\Controllers\Wisatawan\RattingWisatawanController;
 use App\Http\Controllers\UsersImportController;
 use App\Http\Controllers\RattingsImportController;
 use App\Http\Controllers\Wisatawan\RattingDatasetWisatawanController;
+
+Route::get('dashboard-admin', [DashboardAdminController::class, 'index'])
+    ->name('dashboard-admin.index');
+
+// Route proses rekomendasi wisatawan
+Route::get('/wisatawan/rekomendasi/proses', [App\Http\Controllers\RekomendasiController::class, 'proses'])->name('wisatawan.rekomendasi.proses');
+
 
 
 // Form input/edit seluruh ratting 1 user (pivot style)
