@@ -35,7 +35,7 @@ Route::get('/', function () {
     }
 
     if ($role === 'admin') {
-        return redirect()->route('wisata.index');
+           return redirect()->route('dashboard-admin.index');
     }
 
     return redirect()->route('login');
