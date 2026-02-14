@@ -38,6 +38,250 @@
   
 
     @if(isset($similarities))
+    <div class="card mb-4 border-info shadow-sm">
+        <div class="card-header bg-info text-white"><b><i class="fas fa-list mr-1"></i>Langkah Perhitungan (Urut)</b></div>
+        <div class="card-body">
+            <ol>
+                <li><b>Rata‑rata rating per user</b> — ditampilkan tabel singkat di bawah.</li>
+                <li><b>Centered (rating - rata‑rata)</b> — tabel matriks berisi nilai terpusat per user/item.</li>
+                <li><b>Centered Cosine Similarity</b> — daftar similarity user terhadap Anda (urut menurun).</li>
+                <li><b>Ambil Top‑N neighbors (k = {{ $k ?? 3 }})</b> — ditampilkan daftar.</li>
+                <li><b>Prediksi nilai untuk item tak dinilai</b> — per item tampilkan kontribusi neighbor (sim × centered) dan perhitungan weighted average.</li>
+                <li><b>Hasil prediksi</b> — daftar skor prediksi (urut menurun) dan rekomendasi (threshold >= 4.0).</li>
+            </ol>
+        </div>
+    </div>
+
+    {{-- Step 1: averages --}}
+    <div class="card mb-3">
+        <div class="card-header"><b>1) Rata‑rata Rating per User (Dataset + Total & Average)</b></div>
+        <div class="card-body p-2 table-responsive">
+            <table class="table table-sm table-bordered mb-0">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        @foreach($wisataList as $w)
+                            <th class="text-center">{{ $w['nama'] }}</th>
+                        @endforeach
+                        <th class="text-center">Total</th>
+                        <th class="text-center">Average</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach($users as $uid => $userEmail)
+                    @php $total = 0; $count = 0; @endphp
+                    <tr>
+                        <td><b>{{ $userEmail }}</b></td>
+                        @foreach($wisataList as $w)
+                            @php
+                                $val = $ratings[$uid][$w['id']] ?? null;
+                                if ($val !== null) { $total += $val; $count++; }
+                            @endphp
+                            <td class="text-center">@if($val === null) - @else {{ $val }} @endif</td>
+                        @endforeach
+                        <td class="text-center"><b>{{ $total }}</b></td>
+                        <td class="text-center"><b>{{ number_format($averages[$uid] ?? ($count?($total/$count):0),4) }}</b></td>
+                    </tr>
+                @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {{-- Step 2: centered matrix --}}
+    <div class="card mb-3">
+        <div class="card-header"><b>2) Centered Ratings (rating - average)</b></div>
+        <div class="card-body p-2 table-responsive">
+            <table class="table table-sm table-bordered mb-0">
+                <thead>
+                    <tr><th>User</th>
+                        @foreach($wisataList as $w) <th>{{ $w['nama'] }}</th> @endforeach
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach($normalized as $uid => $row)
+                    <tr>
+                        <td><b>{{ $users[$uid] ?? $uid }}</b></td>
+                        @foreach($wisataList as $w)
+                            @php $val = $row[$w['id']] ?? null; @endphp
+                            <td class="text-center">@if($val === null) - @else {{ number_format($val,2) }} @endif</td>
+                        @endforeach
+                    </tr>
+                @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {{-- Step 3 & 4: similarities sorted and top-N --}}
+    <div class="card mb-3">
+        <div class="card-header"><b>3) Similarity (Centered Cosine) & 4) Top‑{{ $k ?? 3 }} Neighbors</b></div>
+        <div class="card-body p-2">
+            <div class="row">
+                <div class="col-12">
+                    <h6>Similarity terhadap Anda (urut menurun)</h6>
+                    
+                    @php
+                        // Order similarity list to match user ordering used in centered matrix
+                        $simListRaw = $similarities ?? [];
+                        $simList = [];
+                        // use the same user ordering as $normalized / $users
+                        $orderedUsers = array_keys($normalized ?? $users ?? []);
+                        foreach ($orderedUsers as $uid) {
+                            if ($uid == ($userId ?? null)) continue;
+                            if (isset($simListRaw[$uid])) {
+                                $simList[$uid] = $simListRaw[$uid];
+                            }
+                        }
+                        // include any remaining users not in orderedUsers
+                        foreach ($simListRaw as $uid => $s) {
+                            if (!isset($simList[$uid]) && $uid != ($userId ?? null)) $simList[$uid] = $s;
+                        }
+                    @endphp
+                    {{-- Per‑user step by step calculations (co-rated items, dot, norms) --}}
+                    @php $simIdx = 1; @endphp
+                    @foreach($simList as $uid => $s)
+                        <div class="mb-2 text-left">
+                            <button class="btn btn-link p-0 text-left" type="button" data-toggle="collapse" data-target="#sim-step-{{ $uid }}" aria-expanded="false" aria-controls="sim-step-{{ $uid }}">
+                                {{ $simIdx }}. {{ $users[$uid] ?? $uid }}, similarity = {{ number_format($s,4) }}
+                            </button>
+                            <div class="collapse border rounded p-2 mt-2 text-left" id="sim-step-{{ $uid }}">
+                                <div class="small text-muted mb-2">Tampilkan hanya item yang co-rated oleh kedua user (nilai centered tidak null).</div>
+                                <table class="table table-sm table-bordered mb-2">
+                                    <thead><tr><th>Item</th><th>Centered (Anda)</th><th>Centered ({{ $users[$uid] ?? $uid }})</th><th>Kontribusi (a×b)</th></tr></thead>
+                                    <tbody>
+                                    @php $dot = 0.0; $normA = 0.0; $normB = 0.0; $sumA = 0.0; $sumB = 0.0; $hasRow=false; $dotTerms = []; $normATerms = []; $normBTerms = []; @endphp
+                                    @foreach($allWisataIds as $wid)
+                                        @php
+                                            $a = $normalized[$userId][$wid] ?? null;
+                                            $b = $normalized[$uid][$wid] ?? null;
+                                        @endphp
+                                        @if($a !== null && $b !== null)
+                                            @php
+                                                $contrib = $a * $b;
+                                                $dot += $contrib;
+                                                $sumA += $a;
+                                                $sumB += $b;
+                                                $normA += $a*$a;
+                                                $normB += $b*$b;
+                                                $dotTerms[] = '(' . number_format($a,4) . '×' . number_format($b,4) . ')';
+                                                $normATerms[] = '(' . number_format($a,4) . ')²';
+                                                $normBTerms[] = '(' . number_format($b,4) . ')²';
+                                                $hasRow = true;
+                                            @endphp
+                                            <tr>
+                                                <td>{{ $wisatas[$wid] ?? $wid }}</td>
+                                                <td class="text-left">{{ number_format($a,4) }}</td>
+                                                <td class="text-left">{{ number_format($b,4) }}</td>
+                                                <td class="text-left">{{ number_format($contrib,4) }}</td>
+                                            </tr>
+                                        @endif
+                                    @endforeach
+                                    @if(!$hasRow)
+                                        <tr><td colspan="4" class="text-left text-muted">Tidak ada item co-rated antara Anda dan {{ $users[$uid] ?? $uid }}.</td></tr>
+                                    @endif
+                                    </tbody>
+                                    @if($hasRow)
+                                    <tfoot>
+                                        <tr class="font-weight-bold">
+                                            <td>Total</td>
+                                            <td class="text-left">{{ number_format($sumA,4) }}</td>
+                                            <td class="text-left">{{ number_format($sumB,4) }}</td>
+                                            <td class="text-left">{{ number_format($dot,4) }}</td>
+                                        </tr>
+                                    </tfoot>
+                                    @endif
+                                </table>
+                                <div class="mb-1">Dot Product (sum a×b) = <b>{{ number_format($dot,4) }}</b></div>
+                                @if(!empty($dotTerms))
+                                <div class="mb-1">Rincian dot: <small>{{ implode(' + ', $dotTerms) }} = <b>{{ number_format($dot,4) }}</b></small></div>
+                                @endif
+                                <div class="mb-1"><br>Norm Anda = sum a² = <b>{{ number_format($normA,4) }}</b></div>
+                                @if(!empty($normATerms))
+                                <div class="mb-1">Rincian a²: <small>{{ implode(' + ', $normATerms) }} = <b>{{ number_format($normA,4) }}</b></small></div>
+                                @endif
+                                <div class="mb-1"><br>Norm {{ $users[$uid] ?? $uid }} = sum b² = <b>{{ number_format($normB,4) }}</b></div>
+                                @if(!empty($normBTerms))
+                                <div class="mb-1">Rincian b²: <small>{{ implode(' + ', $normBTerms) }} = <b>{{ number_format($normB,4) }}</b></small></div>
+                                @endif
+                                <div class="mb-1"><br>Similarity = dot / (√normA × √normB) = <b>{{ number_format($s,4) }}</b></div>
+                            </div>
+                        </div>
+                        @php $simIdx++; @endphp
+                    @endforeach
+                    {{-- akhir perhitungan detail --}}
+                    @php
+                        // Build neighbor rank map for display
+                        $neighborRanks = [];
+                        foreach($neighbors[$userId] ?? [] as $i => $nb) {
+                            $neighborRanks[$nb['user']] = $i + 1;
+                        }
+                    @endphp
+                    <table class="table table-sm table-bordered mb-0">
+                        <thead><tr><th style="width:5%">No.</th><th>User</th><th style="width:20%">Similarity</th><th style="width:15%">Top‑{{ $k ?? 3 }} Rank</th></tr></thead>
+                        <tbody>
+                        @php $no = 1; @endphp
+                        @foreach($simList as $uid => $s)
+                            <tr>
+                                <td>{{ $no++ }}</td>
+                                <td>{{ $users[$uid] ?? $uid }}</td>
+                                <td>{{ number_format($s,4) }}</td>
+                                <td>@if(isset($neighborRanks[$uid])) {{ $neighborRanks[$uid] }} @else - @endif</td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Step 5: prediction contributions --}}
+    <div class="card mb-3">
+        <div class="card-header"><b>5) Perhitungan Prediksi (Weighted Average)</b></div>
+        <div class="card-body p-2">
+            @if(empty($predictions))
+                <div class="text-muted">Tidak ada item yang perlu diprediksi (semua sudah dinilai).</div>
+            @else
+                @foreach($predictions as $wid => $pred)
+                    <div class="mb-2">
+                        <h6>{{ $wisataList[array_search($wid, array_column($wisataList, 'id'))]['nama'] ?? ($wisatas[$wid] ?? $wid) }} — Prediksi: <span class="font-weight-bold">{{ number_format($pred,2) }}</span></h6>
+                        <table class="table table-sm table-bordered mb-1">
+                            <thead><tr><th>Neighbor</th><th>Similarity</th><th>Centered rating (nv)</th><th>Kontribusi (Similarity×nv)</th></tr></thead>
+                            <tbody>
+                            @foreach($predDetails[$wid]['contribs'] ?? [] as $c)
+                                @php
+                                    // Perhitungan nv: rating - rata-rata
+                                    $neighborRating = $ratings[$c['user']][$wid] ?? null;
+                                    $neighborAvg = $averages[$c['user']] ?? null;
+                                    $nvExplain = ($neighborRating !== null && $neighborAvg !== null)
+                                        ? number_format($c['nv'],2) . ' = ' . number_format($neighborRating,2) . ' - ' . number_format($neighborAvg,2)
+                                        : number_format($c['nv'],2);
+                                @endphp
+                                <tr>
+                                    <td>{{ $users[$c['user']] ?? $c['user'] }}</td>
+                                    <td>{{ number_format($c['sim'],4) }}</td>
+                                    <td>
+                                        {{ $nvExplain }}
+                                        <br>
+                                        <small class="text-muted">(nv = rating - rata-rata user)</small>
+                                    </td>
+                                    <td>{{ number_format($c['contrib'],4) }}</td>
+                                </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
+                        <div>Numerator = <b>{{ number_format($predDetails[$wid]['num'] ?? 0,4) }}</b> &nbsp; Denominator = <b>{{ number_format($predDetails[$wid]['den'] ?? 0,4) }}</b>
+                        &nbsp; => predNorm = <b>{{ number_format($predDetails[$wid]['predNorm'] ?? 0,4) }}</b>
+                        &nbsp; => Final = average(user) + predNorm = <b>{{ number_format($predDetails[$wid]['pred'] ?? 0,4) }}</b></div>
+                    </div>
+                    <br>
+                @endforeach
+            @endif
+        </div>
+    </div>
+
+    {{-- Step 6: predictions summary (already existing) --}}
     <div class="card mb-4 border-secondary shadow-sm">
         <div class="card-header bg-secondary text-white">
             <b><i class="fas fa-users mr-1"></i>Daftar Kemiripan (Cosine Similarity) Semua User</b>
@@ -116,14 +360,25 @@
                                             <br><small class="text-muted">(User Paling Mirip)</small>
                                         @endif
                                     </td>
-                                    @foreach($wisataList as $wisata)
-                                        @php
-                                            $isRekom = isset($rekomendasi) && in_array($wisata['nama'] ?? ($wisata->nama ?? ''), $rekomendasi);
-                                        @endphp
-                                        <td class="align-middle text-center" @if($isRekom) style="background-color:#28a745;color:white" @endif>
-                                            {{ $pivot[$uid][$wisata['id'] ?? ($wisata->id ?? 0)] ?? '0' }}
-                                        </td>
-                                    @endforeach
+                                        @foreach($wisataList as $wisata)
+                                            @php
+                                                $isRekom = isset($rekomendasi) && in_array($wisata['nama'] ?? ($wisata->nama ?? ''), $rekomendasi);
+                                                $cellVal = $pivot[$uid][$wisata['id'] ?? ($wisata->id ?? 0)] ?? 0;
+                                                $predVal = $predictions[$wisata['id']] ?? null;
+                                            @endphp
+                                            <td class="align-middle text-center"
+                                                @if($isRekom) style="background-color:#28a745;color:white" @endif>
+                                                @if($cellVal && $cellVal != 0)
+                                                    {{ $cellVal }}
+                                                @else
+                                                    @if(isset($userId) && $uid == $userId && $predVal !== null)
+                                                        <span class="text-warning">{{ number_format($predVal,2) }}</span>
+                                                    @else
+                                                        0
+                                                    @endif
+                                                @endif
+                                            </td>
+                                        @endforeach
                                 </tr>
                             @endif
                         @endforeach
@@ -152,6 +407,7 @@
 
 @push('styles')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="" crossorigin="anonymous">
     <style>
         .card-img-top {
             height: 150px;
@@ -173,6 +429,23 @@
         setTimeout(function() {
             window.location.href = url;
         }, 2000);
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" integrity="" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" integrity="" crossorigin="anonymous"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        try {
+            renderMathInElement(document.body, {
+                // only use the delimiters we used in the template
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "\\(", right: "\\)", display: false}
+                ]
+            });
+        } catch (e) {
+            console.warn('KaTeX render failed', e);
+        }
     });
 </script>
 @endpush
