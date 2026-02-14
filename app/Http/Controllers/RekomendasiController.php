@@ -59,7 +59,7 @@ class RekomendasiController extends Controller
         $simMatrix = $service->computeCenteredCosineSimilarity($normalized);
 
         // 4) sort and take top-N neighbors
-        $k = 3; // configurable neighbor count
+        $k = 2; // configurable neighbor count
         $neighbors = $service->getTopNeighbors($simMatrix, $k, true);
 
         // 5) compute predictions for items not rated by target user using weighted average
