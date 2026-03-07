@@ -47,7 +47,7 @@
                 <li><b>Centered Cosine Similarity</b> — daftar similarity user terhadap Anda (urut menurun).</li>
                 <li><b>Ambil Top‑N neighbors (k = {{ $k ?? 3 }})</b> — ditampilkan daftar.</li>
                 <li><b>Prediksi nilai untuk item tak dinilai</b> — per item tampilkan kontribusi neighbor (sim × centered) dan perhitungan weighted average.</li>
-                <li><b>Hasil prediksi</b> — daftar skor prediksi (urut menurun) dan rekomendasi (threshold >= 4.0).</li>
+                <li><b>Hasil prediksi</b> — daftar skor prediksi (urut menurun) dan rekomendasi.</li>
             </ol>
         </div>
     </div>
