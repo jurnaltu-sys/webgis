@@ -113,9 +113,9 @@
         </div>
     </div>
 
-    {{-- Step 3 & 4: similarities sorted and top-N --}}
+    {{-- Step 3: similarities sorted --}}
     <div class="card mb-3">
-        <div class="card-header"><b>3) Similarity (Centered Cosine) & 4) Top‑{{ $k ?? 3 }} Neighbors</b></div>
+        <div class="card-header"><b>3) Similarity (Centered Cosine)</b></div>
         <div class="card-body p-2">
             <div class="row">
                 <div class="col-12">
@@ -210,29 +210,36 @@
                         @php $simIdx++; @endphp
                     @endforeach
                     {{-- akhir perhitungan detail --}}
-                    @php
-                        // Build neighbor rank map for display
-                        $neighborRanks = [];
-                        foreach($neighbors[$userId] ?? [] as $i => $nb) {
-                            $neighborRanks[$nb['user']] = $i + 1;
-                        }
-                    @endphp
-                    <table class="table table-sm table-bordered mb-0">
-                        <thead><tr><th style="width:5%">No.</th><th>User</th><th style="width:20%">Similarity</th><th style="width:15%">Top‑{{ $k ?? 3 }} Rank</th></tr></thead>
-                        <tbody>
-                        @php $no = 1; @endphp
-                        @foreach($simList as $uid => $s)
-                            <tr>
-                                <td>{{ $no++ }}</td>
-                                <td>{{ $users[$uid] ?? $uid }}</td>
-                                <td>{{ number_format($s,4) }}</td>
-                                <td>@if(isset($neighborRanks[$uid])) {{ $neighborRanks[$uid] }} @else - @endif</td>
-                            </tr>
-                        @endforeach
-                        </tbody>
-                    </table>
                 </div>
             </div>
+        </div>
+    </div>
+
+    {{-- Step 4: Top-N neighbors --}}
+    <div class="card mb-3">
+        <div class="card-header"><b>4) Top‑{{ $k ?? 3 }} Neighbors</b></div>
+        <div class="card-body p-2">
+            @php
+                // Build neighbor rank map for display
+                $neighborRanks = [];
+                foreach($neighbors[$userId] ?? [] as $i => $nb) {
+                    $neighborRanks[$nb['user']] = $i + 1;
+                }
+            @endphp
+            <table class="table table-sm table-bordered mb-0">
+                <thead><tr><th style="width:5%">No.</th><th>User</th><th style="width:20%">Similarity</th><th style="width:15%">Top‑{{ $k ?? 3 }} Rank</th></tr></thead>
+                <tbody>
+                @php $no = 1; @endphp
+                @foreach($simList as $uid => $s)
+                    <tr>
+                        <td>{{ $no++ }}</td>
+                        <td>{{ $users[$uid] ?? $uid }}</td>
+                        <td>{{ number_format($s,4) }}</td>
+                        <td>@if(isset($neighborRanks[$uid])) {{ $neighborRanks[$uid] }} @else - @endif</td>
+                    </tr>
+                @endforeach
+                </tbody>
+            </table>
         </div>
     </div>
 

@@ -3,8 +3,8 @@
 @section('content')
 <div class="container-fluid">
     <div class="mb-4">
-        <h1 class="h4 mb-1 text-success"><i class="fas fa-globe-asia mr-2"></i>Pariwisata Indonesia</h1>
-        <p class="text-muted mb-0">Jelajahi destinasi wisata terbaik di Indonesia.</p>
+        <h1 class="h4 mb-1 text-success"><i class="fas fa-globe-asia mr-2"></i>Pariwisata PANIAI</h1>
+        <p class="text-muted mb-0">Jelajahi destinasi wisata terbaik di PANIAI.</p>
     </div>
     <div class="row">
         @forelse($wisata as $item)

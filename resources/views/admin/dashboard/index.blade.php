@@ -80,6 +80,15 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="photoPreviewModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <img src="" alt="Foto" class="img-fluid w-100" id="photoPreviewImage">
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 @push('styles')
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
@@ -104,6 +113,18 @@
             border-radius: 4px;
             cursor: pointer;
         }
+        .line-label {
+            background-color: white;
+            border: 1px solid black;
+            border-radius: 4px;
+            padding: 2px 4px;
+            font-size: 12px;
+            white-space: pre-line;
+            min-width: 150px;
+            text-align: center;
+            max-width: 250px;
+            word-wrap: break-word;
+        }
     </style>
 @endpush
 @push('scripts')
@@ -120,6 +141,8 @@
                 attribution: '&copy; OpenStreetMap'
             }).addTo(map);
             var markers = [];
+            var connectorLines = []; // array of dashed segments connecting every pair
+            var markerData = []; // array to store marker info: {marker, name, latlng}
             var redIcon = new L.Icon({
                 iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
                 shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
@@ -128,11 +151,24 @@
                 popupAnchor: [1, -34],
                 shadowSize: [41, 41]
             });
+            // Function to calculate Euclidean distance (simplified for lat/lng)
+            function euclideanDistance(lat1, lng1, lat2, lng2) {
+                // Convert to approximate km: 1 degree lat ≈ 111 km, lng varies, use average
+                const latDiffKm = (lat2 - lat1) * 111;
+                const lngDiffKm = (lng2 - lng1) * 111 * Math.cos((lat1 + lat2) / 2 * Math.PI / 180);
+                return Math.sqrt(latDiffKm * latDiffKm + lngDiffKm * lngDiffKm);
+            }
             function clearMarkers() {
                 markers.forEach(function (marker) {
                     map.removeLayer(marker);
                 });
                 markers = [];
+                markerData = [];
+                // also remove any existing connector lines
+                connectorLines.forEach(function(line) {
+                    map.removeLayer(line);
+                });
+                connectorLines = [];
             }
             function updateMarkers() {
                 clearMarkers();
@@ -163,7 +199,35 @@
                     popupHtml += '</div>';
                     var marker = L.marker([lat, lng], { icon: redIcon }).addTo(map).bindPopup(popupHtml);
                     markers.push(marker);
+                    markerData.push({marker: marker, name: name, latlng: [lat, lng]});
                     points.push([lat, lng]);
+                });
+                // Add click event to markers to show connecting lines with labels
+                markerData.forEach(function(data) {
+                    data.marker.on('click', function() {
+                        // Clear existing connector lines
+                        connectorLines.forEach(function(line) {
+                            map.removeLayer(line);
+                        });
+                        connectorLines = [];
+                        // Draw lines to all other markers with labels
+                        markerData.forEach(function(otherData) {
+                            if (otherData !== data) {
+                                var distance = euclideanDistance(data.latlng[0], data.latlng[1], otherData.latlng[0], otherData.latlng[1]);
+                                var label = data.name + ' - ' + otherData.name + '\nJarak: ' + distance.toFixed(2) + ' km';
+                                var line = L.polyline([data.latlng, otherData.latlng], {
+                                    color: 'blue',
+                                    weight: 2,
+                                    dashArray: '5,10'
+                                }).addTo(map).bindTooltip(label, {
+                                    permanent: true,
+                                    direction: 'center',
+                                    className: 'line-label'
+                                });
+                                connectorLines.push(line);
+                            }
+                        });
+                    });
                 });
                 if (points.length > 0) {
                     var bounds = L.latLngBounds(points);

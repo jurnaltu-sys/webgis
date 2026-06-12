@@ -33,7 +33,7 @@
                         <a class="nav-link" href="{{ route('users.index') }}">Users</a>
                     </li>
                     <li class="nav-item {{ request()->routeIs('admin/rattings/excelview.*') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('rattings.excelview') }}">Format Dataset</a>
+                        <a class="nav-link" href="{{ route('rattings.excelview') }}">Dataset</a>
                     </li>
                 @elseif ($userRole === 'wisatawan')
                     <li class="nav-item {{ request()->routeIs('dashboard-wisatawan.*') ? 'active' : '' }}">
@@ -46,7 +46,7 @@
                         <a class="nav-link" href="{{ route('wisatawan-wisata.index') }}">Wisata</a>
                     </li>
                     <li class="nav-item {{ request()->routeIs('wisatawan.rattings.dataset') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('wisatawan.rattings.dataset') }}">Format Dataset</a>
+                        <a class="nav-link" href="{{ route('wisatawan.rattings.dataset') }}">Dataset</a>
                     </li>
                     <li class="nav-item {{ request()->routeIs('rekomendasi-wisatawan.*') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ route('rekomendasi-wisatawan.index') }}">CF(User Based)</a>
