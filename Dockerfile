@@ -27,13 +27,13 @@ WORKDIR /var/www
 # Copy composer files first
 COPY composer.json composer.lock ./
 
-# Install PHP dependencies (no scripts to avoid artisan calls before .env exists)
+# Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
-# Copy package.json and package-lock.json
+# Copy package files
 COPY package.json package-lock.json ./
 
-# Install Node dependencies and build assets
+# Install Node dependencies
 RUN npm ci
 
 # Copy all application files
@@ -46,12 +46,10 @@ RUN npm run build
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
     && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
+# Make start script executable
+RUN chmod +x /var/www/start.sh
+
 # Expose port
 EXPOSE 8000
 
-# Start command
-CMD php artisan migrate --force && \
-    php artisan storage:link && \
-    php artisan config:cache && \
-    php artisan route:cache && \
-    php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
+CMD ["/bin/sh", "/var/www/start.sh"]
