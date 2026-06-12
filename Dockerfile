@@ -24,33 +24,34 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www
 
-# Copy composer files first (for caching)
+# Copy composer files first
 COPY composer.json composer.lock ./
 
-# Install PHP dependencies
+# Install PHP dependencies (no scripts to avoid artisan calls before .env exists)
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
-# Copy package files
-COPY package.json ./
+# Copy package.json and package-lock.json
+COPY package.json package-lock.json ./
 
 # Install Node dependencies and build assets
-RUN npm install && npm run build
+RUN npm ci
 
-# Copy the rest of the application
+# Copy all application files
 COPY . .
 
-# Run composer scripts after full copy
-RUN composer run-script post-autoload-dump || true
+# Build Vite assets
+RUN npm run build
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
     && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
-# Generate app key if not set
-RUN php artisan key:generate --force || true
-
 # Expose port
 EXPOSE 8000
 
 # Start command
-CMD php artisan migrate --force && php artisan storage:link && php artisan config:cache && php artisan route:cache && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
+CMD php artisan migrate --force && \
+    php artisan storage:link && \
+    php artisan config:cache && \
+    php artisan route:cache && \
+    php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
