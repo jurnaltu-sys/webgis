@@ -46,8 +46,8 @@ RUN npm run build
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
     && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
-# Make start script executable
-RUN chmod +x /var/www/start.sh
+# Fix line endings and make start script executable
+RUN sed -i 's/\r//' /var/www/start.sh && chmod +x /var/www/start.sh
 
 # Expose port
 EXPOSE 8000
